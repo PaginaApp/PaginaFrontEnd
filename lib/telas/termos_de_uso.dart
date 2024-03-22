@@ -47,6 +47,7 @@ class _TermosDeUsoState extends State<TermosDeUso> {
                   style: TextStyle(
                     color: const Color(0xfff6f5f2),
                     fontSize: responsiveFontSize(23.7),
+                    fontFamily: 'Poppins',
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -55,6 +56,7 @@ class _TermosDeUsoState extends State<TermosDeUso> {
                   style: TextStyle(
                     color: const Color(0xfff6f5f2),
                     fontSize: responsiveFontSize(23.7),
+                    fontFamily: 'Poppins',
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -78,7 +80,10 @@ class _TermosDeUsoState extends State<TermosDeUso> {
                     ),
                     child: Text(
                       'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed non risus. Suspendisse lectus tortor, dignissim sit amet, adipiscing nec, ultricies sed, dolor. Cras elementum ultrices diam. Maecenas ligula massa, varius a, semper congue, euismod non, mi. Proin porttitor, orci nec nonummy molestie, enim est eleifend mi, non fermentum diam nisl sit amet erat. Duis semper. Duis arcu massa, scelerisque vitae, consequat in, pretium a, enim. Pellentesque congue. Ut in risus volutpat libero pharetra tempor. Cras vestibulum bibendum augue. Praesent egestas leo in pede. Praesent blandit odio eu enim. Pellentesque sed dui ut augue blandit sodales. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Aliquam nibh. Mauris ac mauris sed pede pellentesque fermentum. Maecenas adipiscing ante non diam sodales hendrerit. Nullam lectus justo, vulputate eget mollis sed, tempor sed magna. Nam at tortor in tellus interdum sagittis. Nunc dapibus ligula ac leo ullamcorper, eget tristique velit tincidunt. Curabitur nec dui nec libero eleifend tincidunt. Vivamus euismod, ligula vel rhoncus imperdiet, odio justo semper lacus, id consectetur quam elit at ligula. Integer nec odio. Praesent libero. Sed cursus ante dapibus diam. Sed nisi. Nulla quis sem at nibh elementum imperdiet. Duis sagittis ipsum. Praesent mauris. Fusce nec tellus sed augue semper porta. Mauris massa. Vestibulum lacinia arcu eget nulla. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.',
-                      style: TextStyle(fontSize: responsiveFontSize(15.0)),
+                      style: TextStyle(
+                        fontSize: responsiveFontSize(15.0),
+                        fontFamily: 'Poppins',
+                      ),
                     ),
                   ),
                 ],
@@ -121,6 +126,7 @@ class _TermosDeUsoState extends State<TermosDeUso> {
                                   "Li e concordo",
                                   style: TextStyle(
                                       color: const Color(0xff1f1d34),
+                                      fontFamily: 'Poppins',
                                       fontWeight: FontWeight.bold,
                                       fontSize: responsiveFontSize(15.0)),
                                 ),
@@ -174,7 +180,10 @@ class _TermosDeUsoState extends State<TermosDeUso> {
                       ),
                       child: Text(
                         "Criar conta",
-                        style: TextStyle(fontSize: responsiveFontSize(17.0)),
+                        style: TextStyle(
+                          fontSize: responsiveFontSize(17.0),
+                          fontFamily: 'Poppins',
+                        ),
                       ),
                     ),
                     SizedBox(height: screenHeight * 0.02),
@@ -185,6 +194,7 @@ class _TermosDeUsoState extends State<TermosDeUso> {
                       child: const Text(
                         "Voltar",
                         style: TextStyle(
+                          fontFamily: 'Poppins',
                           color: Color(0xff1f1d34),
                           decoration: TextDecoration.underline,
                           fontWeight: FontWeight.bold,

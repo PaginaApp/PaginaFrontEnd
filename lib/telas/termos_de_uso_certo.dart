@@ -41,7 +41,9 @@ class TermosDeUsoCerto extends StatelessWidget {
                       Text(
                         'Tudo certo!',
                         style: TextStyle(
-                          fontSize: responsiveFontSize(20.0),
+                          fontSize: responsiveFontSize(19.0),
+                          color: const Color(0xff14131a),
+                          fontFamily: 'Poppins',
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -49,21 +51,27 @@ class TermosDeUsoCerto extends StatelessWidget {
                       Text(
                         'Parabéns! Sua conta foi criada',
                         style: TextStyle(
-                          fontSize: responsiveFontSize(15.0),
+                          fontSize: responsiveFontSize(14.0),
+                          color: const Color(0xff14131a),
+                          fontFamily: 'Poppins',
                         ),
                       ),
                       SizedBox(height: screenHeight * 0.005),
                       Text(
                         'com sucesso.',
                         style: TextStyle(
-                          fontSize: responsiveFontSize(15.0),
+                          fontSize: responsiveFontSize(14.0),
+                          color: const Color(0xff14131a),
+                          fontFamily: 'Poppins',
                         ),
                       ),
                       SizedBox(height: screenHeight * 0.005),
                       Text(
                         'Realize o login para acessá-la.',
                         style: TextStyle(
-                          fontSize: responsiveFontSize(15.0),
+                          fontSize: responsiveFontSize(14.0),
+                          color: const Color(0xff14131a),
+                          fontFamily: 'Poppins',
                         ),
                       ),
                       SizedBox(height: screenHeight * 0.02),
@@ -85,7 +93,10 @@ class TermosDeUsoCerto extends StatelessWidget {
                         ),
                         child: Text(
                           "Ok!",
-                          style: TextStyle(fontSize: responsiveFontSize(17.0)),
+                          style: TextStyle(
+                            fontSize: responsiveFontSize(16.0),
+                            fontFamily: 'Poppins',
+                          ),
                         ),
                       ),
                     ],

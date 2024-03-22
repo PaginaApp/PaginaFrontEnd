@@ -1,15 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:projeto_pagina/telas/splash_art.dart';
 
-class TermosDeUsoErrado extends StatelessWidget {
-  const TermosDeUsoErrado({super.key});
+class ConfiguracoesExcluir1 extends StatefulWidget {
+  const ConfiguracoesExcluir1({super.key});
 
   @override
+  State<ConfiguracoesExcluir1> createState() => _ConfiguracoesExcluir1State();
+}
+
+class _ConfiguracoesExcluir1State extends State<ConfiguracoesExcluir1> {
+  @override
   Widget build(BuildContext context) {
-    double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
+    double screenWidth = MediaQuery.of(context).size.width;
 
     double responsiveFontSize(double fontSize) {
-      return fontSize * screenWidth / 375.0;
+      return fontSize * screenWidth / 375;
     }
 
     return Scaffold(
@@ -33,44 +39,49 @@ class TermosDeUsoErrado extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Icon(
-                        Icons.cancel,
-                        color: const Color(0xffcd4e4e),
+                        Icons.check_circle,
+                        color: const Color(0xff3ab45d),
                         size: responsiveFontSize(60.0),
                       ),
                       Text(
-                        'Atenção!',
+                        'Tudo certo!',
                         style: TextStyle(
-                          fontFamily: 'Poppins',
-                          color: const Color(0xff14131a),
                           fontSize: responsiveFontSize(19.0),
+                          color: const Color(0xff14131a),
+                          fontFamily: 'Poppins',
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       SizedBox(height: screenHeight * 0.015),
                       Text(
-                        'Algo deu errado.',
+                        'Sua conta foi excluída',
                         style: TextStyle(
-                          fontFamily: 'Poppins',
-                          color: const Color(0xff14131a),
                           fontSize: responsiveFontSize(14.0),
+                          color: const Color(0xff14131a),
+                          fontFamily: 'Poppins',
                         ),
                       ),
                       SizedBox(height: screenHeight * 0.005),
                       Text(
-                        'Verifique seus dados.',
+                        'com sucesso.',
                         style: TextStyle(
-                          fontFamily: 'Poppins',
-                          color: const Color(0xff14131a),
                           fontSize: responsiveFontSize(14.0),
+                          color: const Color(0xff14131a),
+                          fontFamily: 'Poppins',
                         ),
                       ),
                       SizedBox(height: screenHeight * 0.02),
                       ElevatedButton(
                         onPressed: () {
-                          Navigator.pop(context);
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const SplashArt()),
+                            (Route<dynamic> route) => false,
+                          );
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xff4e90cd),
+                          backgroundColor: const Color(0xff3ab45d),
                           foregroundColor: const Color(0xfff6f5f2),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8.0),
@@ -79,8 +90,9 @@ class TermosDeUsoErrado extends StatelessWidget {
                         child: Text(
                           "Ok!",
                           style: TextStyle(
-                              fontFamily: 'Poppins',
-                              fontSize: responsiveFontSize(16.0)),
+                            fontSize: responsiveFontSize(16.0),
+                            fontFamily: 'Poppins',
+                          ),
                         ),
                       ),
                     ],

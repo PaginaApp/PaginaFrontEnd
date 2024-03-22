@@ -28,22 +28,50 @@ class _LoginState extends State<Login> {
       body: SingleChildScrollView(
         child: Stack(
           children: [
-            Container(
-              height: screenHeight / 4.5,
-              color: const Color(0xffbabdd3),
+            Align(
+              alignment: Alignment.topCenter,
+              child: Container(
+                width: screenWidth,
+                height: screenHeight * 1.2 / 3,
+                decoration: const BoxDecoration(
+                  image: DecorationImage(
+                    image: AssetImage('assets/png/background_login.png'),
+                    fit: BoxFit.fill,
+                  ),
+                ),
+              ),
             ),
-            // CustomPaint(
-            //   painter: WavePainter(),
-            //   child: SizedBox(
-            //     height: screenHeight,
-            //     width: screenWidth,
-            //   ),
-            // ),
-
+            Positioned(
+              top: screenHeight * 0.001,
+              right: screenWidth * 0.01,
+              child: Image.asset(
+                'assets/png/icone_livros.png',
+                width: screenWidth * 0.15,
+                height: screenHeight * 0.15,
+              ),
+            ),
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                SizedBox(height: screenHeight * 0.2),
+                SizedBox(height: screenHeight * 0.13),
+                Center(
+                  child: Image.asset(
+                    'assets/png/pessoas_com_livros.png',
+                    width: screenWidth * 0.6,
+                    height: screenHeight * 0.22,
+                  ),
+                ),
+                SizedBox(height: screenHeight * 0.055),
+                Text(
+                  "Área de Login",
+                  style: TextStyle(
+                    fontSize: responsiveFontSize(24),
+                    fontFamily: 'Poppins',
+                    color: const Color(0xff14131a),
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: screenHeight * 0.02),
                 // Caixa para preencher com o email
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.1),
@@ -52,6 +80,8 @@ class _LoginState extends State<Login> {
                       labelText: "Email",
                       labelStyle: TextStyle(
                         fontSize: responsiveFontSize(16.5),
+                        fontFamily: 'Poppins',
+                        color: const Color(0xff14131a),
                         fontWeight: FontWeight.bold,
                       ),
                       prefixIcon: const Icon(Icons.email),
@@ -85,6 +115,8 @@ class _LoginState extends State<Login> {
                       labelText: "Senha",
                       labelStyle: TextStyle(
                         fontSize: responsiveFontSize(16.5),
+                        fontFamily: 'Poppins',
+                        color: const Color(0xff14131a),
                         fontWeight: FontWeight.bold,
                       ),
                       prefixIcon: const Icon(Icons.lock),
@@ -128,10 +160,12 @@ class _LoginState extends State<Login> {
                           builder: (context) => const EsqueciSenha()),
                     );
                   },
-                  child: const Text(
+                  child: Text(
                     "Esqueci minha senha",
                     style: TextStyle(
-                      color: Color(0xff1f1d34),
+                      color: const Color(0xff1f1d34),
+                      fontSize: responsiveFontSize(12.0),
+                      fontFamily: 'Poppins',
                       decoration: TextDecoration.underline,
                     ),
                   ),
@@ -155,7 +189,10 @@ class _LoginState extends State<Login> {
                   ),
                   child: Text(
                     "Entrar",
-                    style: TextStyle(fontSize: responsiveFontSize(17.0)),
+                    style: TextStyle(
+                      fontSize: responsiveFontSize(16.0),
+                      fontFamily: 'Poppins',
+                    ),
                   ),
                 ),
                 SizedBox(height: screenHeight * 0.02),
@@ -168,10 +205,12 @@ class _LoginState extends State<Login> {
                       MaterialPageRoute(builder: (context) => const Cadastro()),
                     );
                   },
-                  child: const Text(
+                  child: Text(
                     "Não tem uma conta? Cadastre-se",
                     style: TextStyle(
-                      color: Color(0xff1f1d34),
+                      color: const Color(0xff1f1d34),
+                      fontSize: responsiveFontSize(12.0),
+                      fontFamily: 'Poppins',
                       decoration: TextDecoration.underline,
                     ),
                   ),
@@ -187,10 +226,12 @@ class _LoginState extends State<Login> {
                           builder: (context) => const ConsultaTermosUso()),
                     );
                   },
-                  child: const Text(
+                  child: Text(
                     "Consulte nossos termos de uso e políticas de privacidade",
                     style: TextStyle(
-                      color: Color(0xff1f1d34),
+                      color: const Color(0xff1f1d34),
+                      fontSize: responsiveFontSize(12.0),
+                      fontFamily: 'Poppins',
                       decoration: TextDecoration.underline,
                     ),
                   ),
@@ -201,29 +242,5 @@ class _LoginState extends State<Login> {
         ),
       ),
     );
-  }
-}
-
-class WavePainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = const Color(0xfff6f5f2)
-      ..style = PaintingStyle.fill;
-
-    final path = Path()
-      ..moveTo(0, size.height)
-      ..lineTo(size.width / 4.45, size.height * 0.8)
-      ..quadraticBezierTo(size.width / 2, size.height / 2, size.width * 9 / 4,
-          size.height * 0.05)
-      ..lineTo(size.width, size.height)
-      ..close();
-
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return false;
   }
 }
