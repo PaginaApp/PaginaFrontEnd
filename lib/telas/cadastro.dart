@@ -44,6 +44,7 @@ class _CadastroState extends State<Cadastro> {
                   style: TextStyle(
                     color: const Color(0xfff6f5f2),
                     fontSize: responsiveFontSize(23.7),
+                    fontFamily: 'Poppins',
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -65,6 +66,8 @@ class _CadastroState extends State<Cadastro> {
                           'Dados Pessoais',
                           style: TextStyle(
                             fontSize: responsiveFontSize(22.0),
+                            color: const Color(0xff14131a),
+                            fontFamily: 'Poppins',
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -96,8 +99,15 @@ class _CadastroState extends State<Cadastro> {
                         ),
                         floatingLabelBehavior: FloatingLabelBehavior.always,
                         labelStyle: TextStyle(
-                          fontSize: responsiveFontSize(19.5),
+                          fontSize: responsiveFontSize(17.0),
+                          fontFamily: 'Poppins',
+                          color: const Color(0xff14131a),
                           fontWeight: FontWeight.bold,
+                        ),
+                        hintStyle: TextStyle(
+                          fontSize: responsiveFontSize(13.5),
+                          fontFamily: 'Poppins',
+                          color: const Color(0xff14131a),
                         ),
                       ),
                     ),
@@ -136,8 +146,15 @@ class _CadastroState extends State<Cadastro> {
                               floatingLabelBehavior:
                                   FloatingLabelBehavior.always,
                               labelStyle: TextStyle(
-                                fontSize: responsiveFontSize(19.5),
+                                fontSize: responsiveFontSize(17.0),
+                                fontFamily: 'Poppins',
+                                color: const Color(0xff14131a),
                                 fontWeight: FontWeight.bold,
+                              ),
+                              hintStyle: TextStyle(
+                                fontSize: responsiveFontSize(13.5),
+                                fontFamily: 'Poppins',
+                                color: const Color(0xff14131a),
                               ),
                             ),
                           ),
@@ -175,8 +192,15 @@ class _CadastroState extends State<Cadastro> {
                               floatingLabelBehavior:
                                   FloatingLabelBehavior.always,
                               labelStyle: TextStyle(
-                                fontSize: responsiveFontSize(19.5),
+                                fontSize: responsiveFontSize(17.0),
+                                fontFamily: 'Poppins',
+                                color: const Color(0xff14131a),
                                 fontWeight: FontWeight.bold,
+                              ),
+                              hintStyle: TextStyle(
+                                fontSize: responsiveFontSize(13.5),
+                                fontFamily: 'Poppins',
+                                color: const Color(0xff14131a),
                               ),
                             ),
                           ),
@@ -210,8 +234,15 @@ class _CadastroState extends State<Cadastro> {
                         ),
                         floatingLabelBehavior: FloatingLabelBehavior.always,
                         labelStyle: TextStyle(
-                          fontSize: responsiveFontSize(19.5),
+                          fontSize: responsiveFontSize(17.0),
+                          fontFamily: 'Poppins',
+                          color: const Color(0xff14131a),
                           fontWeight: FontWeight.bold,
+                        ),
+                        hintStyle: TextStyle(
+                          fontSize: responsiveFontSize(13.5),
+                          fontFamily: 'Poppins',
+                          color: const Color(0xff14131a),
                         ),
                       ),
                     ),
@@ -241,8 +272,15 @@ class _CadastroState extends State<Cadastro> {
                         ),
                         floatingLabelBehavior: FloatingLabelBehavior.always,
                         labelStyle: TextStyle(
-                          fontSize: responsiveFontSize(19.5),
+                          fontSize: responsiveFontSize(17.0),
+                          fontFamily: 'Poppins',
+                          color: const Color(0xff14131a),
                           fontWeight: FontWeight.bold,
+                        ),
+                        hintStyle: TextStyle(
+                          fontSize: responsiveFontSize(13.5),
+                          fontFamily: 'Poppins',
+                          color: const Color(0xff14131a),
                         ),
                       ),
                     ),
@@ -277,8 +315,15 @@ class _CadastroState extends State<Cadastro> {
                               floatingLabelBehavior:
                                   FloatingLabelBehavior.always,
                               labelStyle: TextStyle(
-                                fontSize: responsiveFontSize(19.5),
+                                fontSize: responsiveFontSize(17.0),
+                                fontFamily: 'Poppins',
+                                color: const Color(0xff14131a),
                                 fontWeight: FontWeight.bold,
+                              ),
+                              hintStyle: TextStyle(
+                                fontSize: responsiveFontSize(13.5),
+                                fontFamily: 'Poppins',
+                                color: const Color(0xff14131a),
                               ),
                             ),
                           ),
@@ -315,8 +360,15 @@ class _CadastroState extends State<Cadastro> {
                               floatingLabelBehavior:
                                   FloatingLabelBehavior.always,
                               labelStyle: TextStyle(
-                                fontSize: responsiveFontSize(19.5),
+                                fontSize: responsiveFontSize(17.0),
+                                fontFamily: 'Poppins',
+                                color: const Color(0xff14131a),
                                 fontWeight: FontWeight.bold,
+                              ),
+                              hintStyle: TextStyle(
+                                fontSize: responsiveFontSize(13.5),
+                                fontFamily: 'Poppins',
+                                color: const Color(0xff14131a),
                               ),
                             ),
                           ),
@@ -353,8 +405,10 @@ class _CadastroState extends State<Cadastro> {
                           ),
                           child: Text(
                             "Próximo",
-                            style:
-                                TextStyle(fontSize: responsiveFontSize(17.0)),
+                            style: TextStyle(
+                              fontSize: responsiveFontSize(17.0),
+                              fontFamily: 'Poppins',
+                            ),
                           ),
                         ),
                         SizedBox(height: screenHeight * 0.02),
@@ -366,6 +420,7 @@ class _CadastroState extends State<Cadastro> {
                             "Cancelar",
                             style: TextStyle(
                               color: Color(0xff1f1d34),
+                              fontFamily: 'Poppins',
                               decoration: TextDecoration.underline,
                               fontWeight: FontWeight.bold,
                             ),

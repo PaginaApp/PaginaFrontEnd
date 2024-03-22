@@ -17,19 +17,50 @@ class EsqueciSenha extends StatelessWidget {
       body: SingleChildScrollView(
         child: Stack(
           children: [
-            Container(
-              height: screenHeight / 4.5,
-              color: const Color(0xffbabdd3),
+            // Container(
+            //   height: screenHeight / 4.5,
+            //   color: const Color(0xffbabdd3),
+            // ),
+            Align(
+              alignment: Alignment.topCenter,
+              child: Container(
+                width: screenWidth,
+                height: screenHeight * 1.2 / 3,
+                decoration: const BoxDecoration(
+                  image: DecorationImage(
+                    image: AssetImage('assets/png/background_login.png'),
+                    fit: BoxFit.fill,
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              top: screenHeight * 0.001,
+              right: screenWidth * 0.01,
+              child: Image.asset(
+                'assets/png/icone_livros.png',
+                width: screenWidth * 0.15,
+                height: screenHeight * 0.15,
+              ),
             ),
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                SizedBox(height: screenHeight * 0.3),
+                SizedBox(height: screenHeight * 0.13),
+                Center(
+                  child: Image.asset(
+                    'assets/png/pessoas_com_livros.png',
+                    width: screenWidth * 0.6,
+                    height: screenHeight * 0.22,
+                  ),
+                ),
+                SizedBox(height: screenHeight * 0.055),
                 Text(
                   "Esqueci minha senha",
                   style: TextStyle(
-                    fontSize: responsiveFontSize(23.0),
-                    color: Colors.black,
+                    fontSize: responsiveFontSize(22.0),
+                    color: const Color(0xff14131a),
+                    fontFamily: 'Poppins',
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -38,21 +69,24 @@ class EsqueciSenha extends StatelessWidget {
                   "Digite o Email cadastrado na",
                   style: TextStyle(
                     fontSize: responsiveFontSize(16.5),
-                    color: Colors.black,
+                    color: const Color(0xff14131a),
+                    fontFamily: 'Poppins',
                   ),
                 ),
                 Text(
                   "Plataforma para receber um link",
                   style: TextStyle(
                     fontSize: responsiveFontSize(16.5),
-                    color: Colors.black,
+                    color: const Color(0xff14131a),
+                    fontFamily: 'Poppins',
                   ),
                 ),
                 Text(
                   "e atualizar sua senha",
                   style: TextStyle(
                     fontSize: responsiveFontSize(16.5),
-                    color: Colors.black,
+                    color: const Color(0xff14131a),
+                    fontFamily: 'Poppins',
                   ),
                 ),
                 SizedBox(height: screenHeight * 0.05),
@@ -65,6 +99,7 @@ class EsqueciSenha extends StatelessWidget {
                       labelText: "Email",
                       labelStyle: TextStyle(
                         fontSize: responsiveFontSize(16.5),
+                        fontFamily: 'Poppins',
                         fontWeight: FontWeight.bold,
                       ),
                       prefixIcon: const Icon(Icons.email),
@@ -101,7 +136,10 @@ class EsqueciSenha extends StatelessWidget {
                   ),
                   child: Text(
                     "Enviar",
-                    style: TextStyle(fontSize: responsiveFontSize(17.0)),
+                    style: TextStyle(
+                      fontSize: responsiveFontSize(16.0),
+                      fontFamily: 'Poppins',
+                    ),
                   ),
                 ),
                 SizedBox(height: screenHeight * 0.02),
@@ -115,6 +153,7 @@ class EsqueciSenha extends StatelessWidget {
                     "Voltar",
                     style: TextStyle(
                       color: Color(0xff1f1d34),
+                      fontFamily: 'Poppins',
                       decoration: TextDecoration.underline,
                       fontWeight: FontWeight.bold,
                     ),
