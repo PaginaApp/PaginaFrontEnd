@@ -249,7 +249,8 @@ class _ConfiguracoesAcervoCadastrosState
                               );
                             },
                           ),
-                        )
+                        ),
+                        SizedBox(height: screenHeight * 0.1),
                       ],
                     ),
                   ),
@@ -351,7 +352,8 @@ class _ConfiguracoesAcervoCadastrosState
                               );
                             },
                           ),
-                        )
+                        ),
+                        SizedBox(height: screenHeight * 0.1),
                       ],
                     ),
                   ),
