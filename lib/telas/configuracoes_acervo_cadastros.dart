@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:projeto_pagina/telas/configuracoes_acervo_cadastros_add.dart';
 
 class ConfiguracoesAcervoCadastros extends StatefulWidget {
   const ConfiguracoesAcervoCadastros({super.key});
@@ -364,10 +365,12 @@ class _ConfiguracoesAcervoCadastrosState
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () {
-            // Navigator.push(
-            //   context,
-            //   MaterialPageRoute(builder: (context) => NovaTela()),
-            // );
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) =>
+                      const ConfiguracoesAcervoCadastrosAdd()),
+            );
           },
           backgroundColor: const Color(0xff4e90cd),
           shape: RoundedRectangleBorder(
