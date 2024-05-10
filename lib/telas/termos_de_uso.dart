@@ -1,9 +1,40 @@
 import 'package:flutter/material.dart';
+import 'package:projeto_pagina/services/authentication_service.dart';
+import 'package:projeto_pagina/telas/login.dart';
 import 'package:projeto_pagina/telas/termos_de_uso_certo.dart';
 import 'package:projeto_pagina/telas/termos_de_uso_errado.dart';
 
 class TermosDeUso extends StatefulWidget {
-  const TermosDeUso({super.key});
+  final String name;
+  final String birthDate;
+  final String cpf;
+  final String phoneNumber;
+  final String email;
+  final String password;
+  final String cep;
+  final String city;
+  final String neighborhood;
+  final String street;
+  final String number;
+  final String state;
+  final String complement;
+
+  const TermosDeUso({
+    Key? key,
+    required this.name,
+    required this.birthDate,
+    required this.cpf,
+    required this.phoneNumber,
+    required this.email,
+    required this.password,
+    required this.cep,
+    required this.city,
+    required this.neighborhood,
+    required this.street,
+    required this.number,
+    required this.state,
+    required this.complement,
+  }) : super(key: key);
 
   @override
   State<TermosDeUso> createState() => _TermosDeUsoState();
@@ -138,16 +169,16 @@ class _TermosDeUsoState extends State<TermosDeUso> {
                     ),
                     ElevatedButton(
                       onPressed: concordo
-                          ? () {
-                              if (_formKey.currentState?.validate() ?? true) {
-                                Navigator.pushAndRemoveUntil(
+                          ? () async {
+                              bool registerSuccess = await _handleRegister();
+                              if (registerSuccess && mounted) {
+                                Navigator.pushReplacement(
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) =>
                                           const TermosDeUsoCerto()),
-                                  (Route<dynamic> route) => false,
                                 );
-                              } else {
+                              } else if (mounted) {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
@@ -209,5 +240,29 @@ class _TermosDeUsoState extends State<TermosDeUso> {
         ],
       ),
     );
+  }
+
+  Future<bool> _handleRegister() async {
+    try {
+      await AuthenticationService().registerUserAndAdress(
+        widget.name,
+        widget.birthDate,
+        widget.cpf,
+        widget.phoneNumber,
+        widget.email,
+        widget.password,
+        widget.cep,
+        widget.city,
+        widget.neighborhood,
+        widget.street,
+        widget.number,
+        widget.state,
+        widget.complement,
+      );
+      return true;
+    } catch (e) {
+      print(e);
+      return false;
+    }
   }
 }
