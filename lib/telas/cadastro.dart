@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:projeto_pagina/services/authentication_service.dart';
 import 'package:projeto_pagina/telas/cadastro_1.dart';
+import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 
 class Cadastro extends StatefulWidget {
   const Cadastro({super.key});
@@ -10,6 +12,14 @@ class Cadastro extends StatefulWidget {
 
 class _CadastroState extends State<Cadastro> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _birthDateController =
+      MaskedTextController(mask: '00/00/0000');
+  final TextEditingController _cpfController = TextEditingController();
+  final TextEditingController _phoneNumberController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
@@ -75,6 +85,7 @@ class _CadastroState extends State<Cadastro> {
                     ),
                     SizedBox(height: screenHeight * 0.05),
                     TextFormField(
+                      controller: _nameController,
                       maxLength: 100,
                       validator: _validateRequiredField,
                       decoration: InputDecoration(
@@ -116,6 +127,7 @@ class _CadastroState extends State<Cadastro> {
                       children: [
                         Expanded(
                           child: TextFormField(
+                            controller: _birthDateController,
                             // PERGUNTAR O QUE VAI RECEBER NA DATA DE NASC
                             maxLength: 10,
                             validator: _validateRequiredField,
@@ -165,6 +177,7 @@ class _CadastroState extends State<Cadastro> {
                         ),
                         Expanded(
                           child: TextFormField(
+                            controller: _cpfController,
                             maxLength: 11,
                             validator: _validateRequiredField,
                             keyboardType: TextInputType.phone,
@@ -208,6 +221,7 @@ class _CadastroState extends State<Cadastro> {
                       ],
                     ),
                     TextFormField(
+                      controller: _phoneNumberController,
                       maxLength: 11,
                       validator: _validateRequiredField,
                       keyboardType: TextInputType.phone,
@@ -248,6 +262,7 @@ class _CadastroState extends State<Cadastro> {
                     ),
                     SizedBox(height: screenHeight * 0.02),
                     TextFormField(
+                      controller: _emailController,
                       maxLength: 100,
                       validator: _validateRequiredField,
                       decoration: InputDecoration(
@@ -289,6 +304,7 @@ class _CadastroState extends State<Cadastro> {
                       children: [
                         Expanded(
                           child: TextFormField(
+                            controller: _passwordController,
                             maxLength: 100,
                             validator: _validateRequiredField,
                             obscureText: true,
@@ -381,20 +397,36 @@ class _CadastroState extends State<Cadastro> {
                       children: [
                         ElevatedButton(
                           onPressed: () {
-                            // if (_formKey.currentState?.validate() ?? false) {
-                            //   Navigator.push(
-                            //     context,
-                            //     MaterialPageRoute(
-                            //         builder: (context) => const Cadastro1()),
-                            //   );
-                            // }
+                            if (_formKey.currentState?.validate() ?? false) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => Cadastro1(
+                                          name: _nameController.text,
+                                          birthDate: _birthDateController.text,
+                                          cpf: _cpfController.text,
+                                          phoneNumber:
+                                              _phoneNumberController.text,
+                                          email: _emailController.text,
+                                          password: _passwordController.text,
+                                        )),
+                              );
+                            }
 
                             // temporario
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => const Cadastro1()),
-                            );
+                            // Navigator.push(
+                            //   context,
+                            //   MaterialPageRoute(
+                            //       builder: (context) => const Cadastro1()),
+                            // );
+                            // AuthenticationService().registerUser(
+                            //   _nameController.text,
+                            //   _emailController.text,
+                            //   _passwordController.text,
+                            //   _phoneNumberController.text,
+                            //   _birthDateController.text,
+                            //   _cpfController.text,
+                            // );
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xff4e90cd),
