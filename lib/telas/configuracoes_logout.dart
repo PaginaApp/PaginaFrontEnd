@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:projeto_pagina/services/authentication_service.dart';
 import 'package:projeto_pagina/telas/login.dart';
 
 class ConfiguracoesLogout extends StatefulWidget {
@@ -98,14 +99,17 @@ class _ConfiguracoesLogoutState extends State<ConfiguracoesLogout> {
                             ),
                           ),
                           ElevatedButton(
-                            onPressed: () {
-                              // Mais tarde será implementado o logout
-                              Navigator.pushAndRemoveUntil(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => const Login()),
-                                (Route<dynamic> route) => false,
-                              );
+                            onPressed: () async {
+                              AuthenticationService().logoutUser();
+
+                              if (mounted) {
+                                Navigator.pushAndRemoveUntil(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => const Login()),
+                                  (Route<dynamic> route) => false,
+                                );
+                              }
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xff4e90cd),
