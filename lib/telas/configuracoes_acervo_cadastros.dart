@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:projeto_pagina/telas/configuracoes_acervo_cadastros_add.dart';
+import 'package:projeto_pagina/telas/produto_negociacao_negociacoes.dart';
 
 class ConfiguracoesAcervoCadastros extends StatefulWidget {
   const ConfiguracoesAcervoCadastros({super.key});
@@ -271,6 +272,13 @@ class _ConfiguracoesAcervoCadastrosState
                                 onTap: () {
                                   if (!isLocked) {
                                     print('Caixa $index clicada');
+                                  } else {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              const ProdutoNegociacaoNegociacoes()),
+                                    );
                                   }
                                 },
                                 child: Opacity(
