@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:projeto_pagina/services/authentication_service.dart';
 import 'package:projeto_pagina/telas/cadastro.dart';
 import 'package:projeto_pagina/telas/consulta_termos_uso.dart';
 import 'package:projeto_pagina/telas/esqueci_a_senha.dart';
@@ -13,6 +14,8 @@ class Login extends StatefulWidget {
 
 class _LoginState extends State<Login> {
   bool _showPassword = false;
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -76,6 +79,7 @@ class _LoginState extends State<Login> {
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.1),
                   child: TextField(
+                    controller: _emailController,
                     decoration: InputDecoration(
                       labelText: "Email",
                       labelStyle: TextStyle(
@@ -110,6 +114,7 @@ class _LoginState extends State<Login> {
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.1),
                   child: TextField(
+                    controller: _passwordController,
                     obscureText: !_showPassword,
                     decoration: InputDecoration(
                       labelText: "Senha",
@@ -174,11 +179,46 @@ class _LoginState extends State<Login> {
 
                 // Botão de entrar
                 ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const Home()),
-                    );
+                  onPressed: () async {
+                    bool loginSuccess = await _handleLogin();
+                    // Condição temporária só para conseguir mudar de tela
+                    //bool loginSuccess = true;
+                    if (loginSuccess && mounted) {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (context) => const Home()),
+                      );
+                      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            'Login efetuado com sucesso!',
+                            style: TextStyle(
+                              fontFamily: 'Poppins',
+                              fontSize: responsiveFontSize(16.0),
+                            ),
+                          ),
+                          duration: const Duration(seconds: 5),
+                          backgroundColor: const Color(0xff4ecd72),
+                        ),
+                      );
+                    } else if (mounted) {
+                      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            'Erro ao efetuar login. Verifique suas credenciais.',
+                            style: TextStyle(
+                              fontFamily: 'Poppins',
+                              fontSize: responsiveFontSize(16.0),
+                            ),
+                          ),
+                          duration: const Duration(seconds: 5),
+                          backgroundColor: const Color(0xffec4e4e),
+                        ),
+                      );
+                    }
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xff4e90cd),
@@ -242,5 +282,15 @@ class _LoginState extends State<Login> {
         ),
       ),
     );
+  }
+
+  Future<bool> _handleLogin() async {
+    try {
+      await AuthenticationService()
+          .loginUser(_emailController.text, _passwordController.text);
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 }
