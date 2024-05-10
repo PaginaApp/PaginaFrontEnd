@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:projeto_pagina/services/authentication_service.dart';
 
 class ConfiguracoesAlterarSenha extends StatefulWidget {
   const ConfiguracoesAlterarSenha({super.key});
@@ -10,6 +11,12 @@ class ConfiguracoesAlterarSenha extends StatefulWidget {
 
 class _ConfiguracoesAlterarSenhaState extends State<ConfiguracoesAlterarSenha> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
+  final TextEditingController _currentPasswordController =
+      TextEditingController();
+  final TextEditingController _newPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -54,8 +61,10 @@ class _ConfiguracoesAlterarSenhaState extends State<ConfiguracoesAlterarSenha> {
                   children: [
                     SizedBox(height: screenHeight * 0.05),
                     TextFormField(
+                      controller: _currentPasswordController,
                       maxLength: 100,
                       validator: _validateRequiredField,
+                      obscureText: true,
                       decoration: InputDecoration(
                         labelText: 'Senha Atual',
                         hintText: 'Insira sua senha atual...',
@@ -80,8 +89,10 @@ class _ConfiguracoesAlterarSenhaState extends State<ConfiguracoesAlterarSenha> {
                     ),
                     SizedBox(height: screenHeight * 0.03),
                     TextFormField(
+                      controller: _newPasswordController,
                       maxLength: 100,
                       validator: _validateRequiredField,
+                      obscureText: true,
                       decoration: InputDecoration(
                         labelText: 'Nova Senha',
                         hintText: 'Insira uma nova senha...',
@@ -118,8 +129,10 @@ class _ConfiguracoesAlterarSenhaState extends State<ConfiguracoesAlterarSenha> {
                     ),
                     SizedBox(height: screenHeight * 0.03),
                     TextFormField(
+                      controller: _confirmPasswordController,
                       maxLength: 100,
                       validator: _validateRequiredField,
+                      obscureText: true,
                       decoration: InputDecoration(
                         labelText: 'Confirme a Senha',
                         hintText: 'Repita a senha...',
@@ -172,31 +185,79 @@ class _ConfiguracoesAlterarSenhaState extends State<ConfiguracoesAlterarSenha> {
                               ),
                             ),
                             ElevatedButton(
-                              onPressed: () {
-                                bool success = true;
+                              onPressed: () async {
+                                // verifica se as senhas são iguais
+                                if (_newPasswordController.text !=
+                                    _confirmPasswordController.text) {
+                                  ScaffoldMessenger.of(context)
+                                      .hideCurrentSnackBar();
 
-                                String message = success
-                                    ? "Seus dados foram alterados com sucesso."
-                                    : "Algo deu errado, verifique seus dados";
-
-                                ScaffoldMessenger.of(context)
-                                    .hideCurrentSnackBar();
-
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      message,
-                                      style: TextStyle(
-                                        fontFamily: 'Poppins',
-                                        fontSize: responsiveFontSize(16.0),
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        "As senhas não coincidem.",
+                                        style: TextStyle(
+                                          fontFamily: 'Poppins',
+                                          fontSize: responsiveFontSize(16.0),
+                                        ),
                                       ),
+                                      duration: const Duration(seconds: 5),
+                                      backgroundColor: const Color(0xffcd4e4e),
                                     ),
-                                    duration: const Duration(seconds: 5),
-                                    backgroundColor: success
-                                        ? const Color(0xff4ecd72)
-                                        : const Color(0xffcd4e4e),
-                                  ),
-                                );
+                                  );
+                                } else {
+                                  // se as senhas são iguais
+                                  bool success = await _handleChangePassword();
+
+                                  // se a senha foi alterada com sucesso
+                                  if (success &&
+                                      mounted &&
+                                      _formKey.currentState!.validate()) {
+                                    ScaffoldMessenger.of(context)
+                                        .hideCurrentSnackBar();
+
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          'Senha alterada com sucesso!',
+                                          style: TextStyle(
+                                            fontFamily: 'Poppins',
+                                            fontSize: responsiveFontSize(16.0),
+                                          ),
+                                        ),
+                                        duration: const Duration(seconds: 5),
+                                        backgroundColor:
+                                            const Color(0xff4ecd72),
+                                      ),
+                                    );
+                                    Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (BuildContext context) =>
+                                            super.widget,
+                                      ),
+                                    );
+                                  } else if (mounted) {
+                                    // se não foi possível alterar a senha
+                                    ScaffoldMessenger.of(context)
+                                        .hideCurrentSnackBar();
+
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          'Erro ao alterar a senha.',
+                                          style: TextStyle(
+                                            fontFamily: 'Poppins',
+                                            fontSize: responsiveFontSize(16.0),
+                                          ),
+                                        ),
+                                        duration: const Duration(seconds: 5),
+                                        backgroundColor:
+                                            const Color(0xffcd4e4e),
+                                      ),
+                                    );
+                                  }
+                                }
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: const Color(0xff4e90cd),
@@ -234,5 +295,15 @@ class _ConfiguracoesAlterarSenhaState extends State<ConfiguracoesAlterarSenha> {
         ),
       ),
     );
+  }
+
+  Future<bool> _handleChangePassword() async {
+    try {
+      await AuthenticationService().changePassword(
+          _currentPasswordController.text, _newPasswordController.text);
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 }
