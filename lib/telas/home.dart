@@ -1,6 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:projeto_pagina/data/models/exemplar_detalhes_model.dart';
+import 'package:projeto_pagina/data/repositories/exemplar_repository.dart';
+import 'package:projeto_pagina/data/repositories/produto_repository.dart';
+import 'package:projeto_pagina/services/exemplar_detalhes_service.dart';
+import 'package:projeto_pagina/stores/exemplar_store.dart';
+import 'package:projeto_pagina/stores/produto_store.dart';
 import 'package:projeto_pagina/telas/configuracoes.dart';
 import 'package:projeto_pagina/telas/home_categorias.dart';
+import 'package:projeto_pagina/telas/produto.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -10,6 +18,15 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  final ExemplarStore exemplarStore =
+      ExemplarStore(exemplarRepository: ExemplarRepository());
+
+  @override
+  void initState() {
+    super.initState();
+    exemplarStore.getExemplares(1, 50);
+  }
+
   @override
   Widget build(BuildContext context) {
     double screenHeight = MediaQuery.of(context).size.height;
@@ -55,13 +72,29 @@ class _HomeState extends State<Home> {
                     Padding(
                       padding: EdgeInsets.all(screenWidth * 0.03),
                       child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const Configuracoes(),
-                            ),
-                          );
+                        onPressed: () async {
+                          SharedPreferences prefs =
+                              await SharedPreferences.getInstance();
+
+                          String? userId = prefs.getString('userId');
+                          String? token = prefs.getString('token');
+
+                          print("user id pego no shared preferences");
+                          print(userId);
+                          print("token pego no shared preferences");
+                          print(token);
+
+                          if (mounted) {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => Configuracoes(
+                                  userId: userId,
+                                  token: token,
+                                ),
+                              ),
+                            );
+                          }
                         },
                         style: ElevatedButton.styleFrom(
                           padding: EdgeInsets.zero,
@@ -127,79 +160,177 @@ class _HomeState extends State<Home> {
                       ),
                     ),
                   ),
-                  Expanded(
-                    child: ListView.builder(
-                      itemCount:
-                          10, // trocar por items.length quando a API estiver pronta
-                      itemBuilder: (context, index) {
-                        return InkWell(
-                          onTap: () {
-                            print(
-                                'Caixa $index clicada'); // Trocar pela ação ao clicar
-                          },
-                          child: Container(
-                            margin: EdgeInsets.all(screenWidth * 0.05),
-                            padding: EdgeInsets.all(screenWidth * 0.02),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(8.0),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.grey.withOpacity(0.5),
-                                  spreadRadius: 5,
-                                  blurRadius: 7,
-                                  offset: const Offset(0, 3),
-                                ),
-                              ],
-                            ),
-                            child: Row(
-                              children: [
-                                Image.asset(
-                                  'assets/png/emprestimo.png', // Trocar pela URL da imagem do livro quando a API estiver pronta
-                                  width: screenWidth * 0.3,
-                                  height: screenHeight * 0.1,
-                                ),
-                                SizedBox(width: screenWidth * 0.002),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'Nome do livro', // Trocar pelo nome do livro quando a API estiver pronta
-                                        style: TextStyle(
-                                          fontFamily: 'Poppins',
-                                          fontSize: responsiveFontSize(15.0),
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      SizedBox(height: screenHeight * 0.005),
-                                      SingleChildScrollView(
-                                        scrollDirection: Axis.horizontal,
-                                        child: Row(
-                                          children: [
-                                            // Trocar pelo nome das categorias quando a API estiver pronta
-                                            _buildCategory('Aventura'),
-                                            _buildCategory('Biografia'),
-                                          ],
-                                        ),
-                                      ),
-                                      SizedBox(height: screenHeight * 0.01),
-                                      Image.asset(
-                                        'assets/png/doacao.png', // Trocar pela URL da imagem de doação, empréstimo, troca ou venda
-                                        width: screenWidth * 0.1,
-                                        height: screenHeight * 0.05,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
+
+                  // Lista de exemplares
+                  AnimatedBuilder(
+                    animation: Listenable.merge([
+                      exemplarStore.isLoading,
+                      exemplarStore.error,
+                      exemplarStore.state,
+                    ]),
+                    builder: (context, child) {
+                      if (exemplarStore.isLoading.value) {
+                        return const Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      }
+
+                      if (exemplarStore.error.value.isNotEmpty) {
+                        return Center(
+                          child: Text(
+                            "Falha ao carregar exemplares, verifique sua conexão",
+                            style: TextStyle(
+                              color: const Color(0xffcd4e4e),
+                              fontSize: responsiveFontSize(14.0),
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'Poppins',
                             ),
                           ),
                         );
-                      },
-                    ),
-                  )
+                      }
+
+                      if (exemplarStore.state.value.isEmpty) {
+                        return Center(
+                          child: Text(
+                            'Nenhum exemplar encontrado',
+                            style: TextStyle(
+                              color: const Color(0xff14131a),
+                              fontSize: responsiveFontSize(14.0),
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'Poppins',
+                            ),
+                          ),
+                        );
+                      } else {
+                        return Expanded(
+                          child: ListView.builder(
+                            itemCount: exemplarStore.state.value
+                                .length, // trocar por items.length quando a API estiver pronta
+                            itemBuilder: (context, index) {
+                              final exemplar = exemplarStore.state.value[index];
+                              return InkWell(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          Produto(exemplarId: exemplar.id),
+                                    ),
+                                  );
+                                  //exemplarStore.getExemplares(1, 10);
+                                  print(exemplar.id);
+                                  print(exemplar.descricao);
+
+                                  //print(produtoStore.state.value.length);
+                                },
+                                child: FutureBuilder<ExemplarDetalhesModel>(
+                                  future: ExemplarDetalhesService()
+                                      .fetchExemplarDetalhes(exemplar.id),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.connectionState ==
+                                        ConnectionState.waiting) {
+                                      return const Center(
+                                        child: CircularProgressIndicator(),
+                                      );
+                                    } else if (snapshot.hasError) {
+                                      return Center(
+                                        child: Text(
+                                          'Erro ao carregar exemplar',
+                                          style: TextStyle(
+                                            color: const Color(0xffcd4e4e),
+                                            fontSize: responsiveFontSize(14.0),
+                                            fontWeight: FontWeight.bold,
+                                            fontFamily: 'Poppins',
+                                          ),
+                                        ),
+                                      );
+                                    } else {
+                                      final exemplarDetalhes = snapshot.data!;
+                                      return Container(
+                                        margin:
+                                            EdgeInsets.all(screenWidth * 0.05),
+                                        padding:
+                                            EdgeInsets.all(screenWidth * 0.02),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius:
+                                              BorderRadius.circular(8.0),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color:
+                                                  Colors.grey.withOpacity(0.5),
+                                              spreadRadius: 5,
+                                              blurRadius: 7,
+                                              offset: const Offset(0, 3),
+                                            ),
+                                          ],
+                                        ),
+                                        child: Row(
+                                          children: [
+                                            Image.asset(
+                                              'assets/png/emprestimo.png', // Trocar pela URL da imagem do livro quando a API estiver pronta
+                                              width: screenWidth * 0.3,
+                                              height: screenHeight * 0.1,
+                                            ),
+                                            SizedBox(
+                                                width: screenWidth * 0.002),
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    exemplarDetalhes
+                                                        .titulo, // Trocar pelo nome do livro quando a API estiver pronta
+                                                    style: TextStyle(
+                                                      fontFamily: 'Poppins',
+                                                      fontSize:
+                                                          responsiveFontSize(
+                                                              15.0),
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                  SizedBox(
+                                                      height:
+                                                          screenHeight * 0.005),
+                                                  SingleChildScrollView(
+                                                    scrollDirection:
+                                                        Axis.horizontal,
+                                                    child: Row(
+                                                      children: [
+                                                        // Trocar pelo nome das categorias quando a API estiver pronta
+                                                        _buildCategory(
+                                                            'Aventura'),
+                                                        _buildCategory(
+                                                            'Biografia'),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                  SizedBox(
+                                                      height:
+                                                          screenHeight * 0.01),
+                                                  Image.asset(
+                                                    'assets/png/doacao.png', // Trocar pela URL da imagem de doação, empréstimo, troca ou venda
+                                                    width: screenWidth * 0.1,
+                                                    height: screenHeight * 0.05,
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    }
+                                  },
+                                ),
+                              );
+                            },
+                          ),
+                        );
+                      }
+                    },
+                  ),
                 ],
               ),
             ),
