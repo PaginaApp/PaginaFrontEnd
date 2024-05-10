@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:projeto_pagina/data/models/dados_pessoais_model.dart';
+import 'package:projeto_pagina/services/dados_pessoais_service.dart';
 import 'package:projeto_pagina/telas/configuracoes_acervo_cadastros.dart';
 import 'package:projeto_pagina/telas/configuracoes_alterar_senha.dart';
 import 'package:projeto_pagina/telas/configuracoes_avaliacoes_titulos.dart';
@@ -11,13 +13,28 @@ import 'package:projeto_pagina/telas/configuracoes_suporte.dart';
 import 'package:projeto_pagina/telas/configuracoes_termos_uso.dart';
 
 class Configuracoes extends StatefulWidget {
-  const Configuracoes({super.key});
+  final String? userId;
+  final String? token;
+
+  const Configuracoes({Key? key, required this.userId, required this.token})
+      : super(key: key);
 
   @override
   State<Configuracoes> createState() => _ConfiguracoesState();
 }
 
 class _ConfiguracoesState extends State<Configuracoes> {
+  final DadosPessoaisService _dadosPessoaisService = DadosPessoaisService();
+
+  late Future<DadosPessoaisModel> _dadosPessoaisFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _dadosPessoaisFuture =
+        _dadosPessoaisService.fetchDadosPessoais(widget.userId ?? '');
+  }
+
   @override
   Widget build(BuildContext context) {
     double screenHeight = MediaQuery.of(context).size.height;
@@ -35,39 +52,114 @@ class _ConfiguracoesState extends State<Configuracoes> {
           iconTheme: const IconThemeData(color: Color(0xfff6f5f2)),
           flexibleSpace: Stack(
             children: [
-              Positioned(
-                left: screenWidth * 0.05,
-                top: screenHeight * 0.1,
-                child: CircleAvatar(
-                  radius: screenWidth * 0.08,
-                  backgroundColor: const Color(0xfff6f5f2),
-                  child: Icon(Icons.person, size: screenWidth * 0.07),
-                ),
-              ),
-              Positioned(
-                left: screenWidth * 0.23,
-                top: screenHeight * 0.07,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Nome do usuário',
-                      style: TextStyle(
-                          fontFamily: 'Poppins',
-                          fontSize: responsiveFontSize(18),
+              // foto de perfil do usuário
+              FutureBuilder<Image>(
+                future: _dadosPessoaisService.fetchAvatar(widget.userId ?? ''),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return Center(
+                      child: Text(
+                        'Erro ao carregar imagem',
+                        style: TextStyle(
                           color: const Color(0xfff6f5f2),
-                          fontWeight: FontWeight.bold),
-                    ),
-                    Text(
-                      '@título',
-                      style: TextStyle(
                           fontFamily: 'Poppins',
-                          fontSize: responsiveFontSize(15),
-                          color: const Color(0xfff6f5f2)),
-                    ),
-                  ],
-                ),
+                          fontSize: responsiveFontSize(14),
+                        ),
+                      ),
+                    );
+                  } else {
+                    final image = snapshot.data!;
+                    return Positioned(
+                      left: screenWidth * 0.05,
+                      top: screenHeight * 0.1,
+                      child: CircleAvatar(
+                        radius: screenWidth * 0.08,
+                        backgroundColor: const Color(0xfff6f5f2),
+                        child: image,
+                      ),
+                    );
+                  }
+                },
               ),
+              // Positioned(
+              //   left: screenWidth * 0.05,
+              //   top: screenHeight * 0.1,
+              //   child: CircleAvatar(
+              //     radius: screenWidth * 0.08,
+              //     backgroundColor: const Color(0xfff6f5f2),
+              //     child: Icon(Icons.person, size: screenWidth * 0.07),
+              //   ),
+              // ),
+
+              // Começo do future builder com nome de usuário e título
+              FutureBuilder<DadosPessoaisModel>(
+                future: _dadosPessoaisFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return Positioned(
+                      left: screenWidth * 0.23,
+                      top: screenHeight * 0.07,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // ignore: sized_box_for_whitespace
+                          Container(
+                            width: screenWidth * 0.5,
+                            child: Text(
+                              'Erro ao carregar nome de usuário e título',
+                              style: TextStyle(
+                                  fontFamily: 'Poppins',
+                                  fontSize: responsiveFontSize(14),
+                                  color: const Color(0xfff6f5f2),
+                                  fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  } else {
+                    final dadosPessoais = snapshot.data!;
+                    return Positioned(
+                      left: screenWidth * 0.23,
+                      top: screenHeight * 0.07,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // ignore: sized_box_for_whitespace
+                          Container(
+                            width: screenWidth * 0.5,
+                            child: Text(
+                              dadosPessoais.nome,
+                              style: TextStyle(
+                                  fontFamily: 'Poppins',
+                                  fontSize: responsiveFontSize(16),
+                                  color: const Color(0xfff6f5f2),
+                                  fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                          // ignore: sized_box_for_whitespace
+                          Container(
+                            width: screenWidth * 0.5,
+                            child: Text(
+                              "@ tituloo",
+                              style: TextStyle(
+                                fontFamily: 'Poppins',
+                                fontSize: responsiveFontSize(15),
+                                color: const Color(0xfff6f5f2),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+                },
+              ),
+              // Fim do future builder com nome de usuário e título
               Positioned(
                 right: screenWidth * 0.01,
                 bottom: screenHeight * 0.01,
@@ -85,8 +177,10 @@ class _ConfiguracoesState extends State<Configuracoes> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) =>
-                                  const ConfiguracoesMeusDados(),
+                              builder: (context) => ConfiguracoesMeusDados(
+                                userId: widget.userId,
+                                token: widget.token,
+                              ),
                             ),
                           );
                         },
