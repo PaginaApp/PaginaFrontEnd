@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:projeto_pagina/telas/cadastro.dart';
 import 'package:projeto_pagina/telas/login.dart';
 
 class SplashArt extends StatefulWidget {
@@ -78,7 +79,13 @@ class _SplashArtState extends State<SplashArt> {
                       height: screenHeight * 0.04,
                     ),
                     ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const Cadastro()),
+                        );
+                      },
                       style: ElevatedButton.styleFrom(
                         padding: EdgeInsets.all(screenWidth * 0.05),
                         backgroundColor: const Color(0xfff6f5f2),
