@@ -1,29 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:projeto_pagina/data/repositories/desejo_repository.dart';
+import 'package:projeto_pagina/data/repositories/produto_repository.dart';
 import 'package:projeto_pagina/stores/desejo_store.dart';
-import 'package:projeto_pagina/telas/configuracoes_lista_de_desejos_1.dart';
+import 'package:projeto_pagina/stores/produto_store.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class ConfiguracoesListaDeDesejos extends StatefulWidget {
-  const ConfiguracoesListaDeDesejos({super.key});
+class ConfiguracoesListaDeDesejos1 extends StatefulWidget {
+  const ConfiguracoesListaDeDesejos1({super.key});
 
   @override
-  State<ConfiguracoesListaDeDesejos> createState() =>
-      _ConfiguracoesListaDeDesejosState();
+  State<ConfiguracoesListaDeDesejos1> createState() =>
+      _ConfiguracoesListaDeDesejos1State();
 }
 
-class _ConfiguracoesListaDeDesejosState
-    extends State<ConfiguracoesListaDeDesejos> {
-  final DesejoStore desejoStore =
-      DesejoStore(desejoRepository: DesejoRepository());
+class _ConfiguracoesListaDeDesejos1State
+    extends State<ConfiguracoesListaDeDesejos1> {
+  final ProdutoStore produtoStore = ProdutoStore(
+    produtoRepository: ProdutoRepository(),
+  );
+
+  final DesejoStore desejoStore = DesejoStore(
+    desejoRepository: DesejoRepository(),
+  );
 
   @override
   void initState() {
     super.initState();
-    SharedPreferences.getInstance().then((prefs) {
-      String? id = prefs.getString('userId');
-      desejoStore.getDesejos(1, 10, id ?? '');
-    });
+    produtoStore.getProdutos(1, 50);
   }
 
   @override
@@ -54,14 +57,67 @@ class _ConfiguracoesListaDeDesejosState
               color: Color(0xff4e90cd),
             ),
           ),
+          SizedBox(
+            width: screenWidth * 0.9,
+            child: Text(
+              'Pesquise para adicionar mais livros à sua lista de desejos.',
+              style: TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: responsiveFontSize(14.0),
+                color: const Color(0xff14131a),
+              ),
+            ),
+          ),
           Row(
             children: [
               Expanded(
                 child: Padding(
                   padding: EdgeInsets.all(screenWidth * 0.07),
                   child: TextField(
+                    onSubmitted: (query) async {
+                      bool success = await _handlePesquisarProdutos(query);
+
+                      if (success && mounted) {
+                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              'Livro encontrado com sucesso!',
+                              style: TextStyle(
+                                fontFamily: 'Poppins',
+                                fontSize: responsiveFontSize(16.0),
+                              ),
+                            ),
+                            duration: const Duration(seconds: 5),
+                            backgroundColor: const Color(0xff4ecd72),
+                          ),
+                        );
+                      } else if (mounted) {
+                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              'Livro não encontrado!',
+                              style: TextStyle(
+                                fontFamily: 'Poppins',
+                                fontSize: responsiveFontSize(16.0),
+                              ),
+                            ),
+                            duration: const Duration(seconds: 5),
+                            backgroundColor: const Color(0xffec4e4e),
+                          ),
+                        );
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (BuildContext context) => super.widget,
+                          ),
+                        );
+                      }
+                    },
                     decoration: InputDecoration(
-                      hintText: 'Título, autor, editora...',
+                      hintText: 'Pesquise por título, autor, editora...',
                       hintStyle: TextStyle(
                         color: const Color(0xff14131a),
                         fontFamily: 'Poppins',
@@ -88,22 +144,23 @@ class _ConfiguracoesListaDeDesejosState
               ),
             ],
           ),
-          // =============================================================================
+
+          // ====================================================================
 
           AnimatedBuilder(
             animation: Listenable.merge([
-              desejoStore.isLoading,
-              desejoStore.error,
-              desejoStore.state,
+              produtoStore.isLoading,
+              produtoStore.error,
+              produtoStore.state,
             ]),
             builder: (context, child) {
-              if (desejoStore.isLoading.value) {
+              if (produtoStore.isLoading.value) {
                 return const Center(
                   child: CircularProgressIndicator(),
                 );
               }
 
-              if (desejoStore.error.value.isNotEmpty) {
+              if (produtoStore.error.value.isNotEmpty) {
                 return Center(
                   child: Text(
                     "Falha ao carregar livros, verifique sua conexão",
@@ -117,30 +174,16 @@ class _ConfiguracoesListaDeDesejosState
                 );
               }
 
-              if (desejoStore.state.value.isEmpty) {
+              if (produtoStore.state.value.isEmpty) {
                 return Center(
-                  child: Column(
-                    children: [
-                      Text(
-                        'Nenhum livro encontrado.',
-                        style: TextStyle(
-                          color: const Color(0xff14131a),
-                          fontSize: responsiveFontSize(14.0),
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'Poppins',
-                        ),
-                      ),
-                      SizedBox(height: screenHeight * 0.01),
-                      Text(
-                        'Clique no botão abaixo para procurar livros.',
-                        style: TextStyle(
-                          color: const Color(0xff14131a),
-                          fontSize: responsiveFontSize(14.0),
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'Poppins',
-                        ),
-                      )
-                    ],
+                  child: Text(
+                    'Nenhum livro encontrado',
+                    style: TextStyle(
+                      color: const Color(0xff14131a),
+                      fontSize: responsiveFontSize(14.0),
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Poppins',
+                    ),
                   ),
                 );
               } else {
@@ -152,14 +195,14 @@ class _ConfiguracoesListaDeDesejosState
                       children: [
                         Expanded(
                           child: ListView.builder(
-                            itemCount: desejoStore.state.value
+                            itemCount: produtoStore.state.value
                                 .length, // trocar por items.length quando a API estiver pronta
                             itemBuilder: (context, index) {
-                              final desejo = desejoStore.state.value[index];
+                              final livro = produtoStore.state.value[index];
                               return InkWell(
-                                onTap: () async {
+                                onTap: () {
                                   print(
-                                      'Caixa $index clicada'); // Trocar pela ação ao clicar
+                                      'Caixa $index clicadaaaa'); // Trocar pela ação ao clicar
                                 },
                                 child: Container(
                                   margin: EdgeInsets.all(screenWidth * 0.05),
@@ -190,8 +233,7 @@ class _ConfiguracoesListaDeDesejosState
                                               CrossAxisAlignment.start,
                                           children: [
                                             Text(
-                                              desejo
-                                                  .titulo, // Trocar pelo nome do livro quando a API estiver pronta
+                                              livro.titulo,
                                               style: TextStyle(
                                                 fontFamily: 'Poppins',
                                                 fontSize:
@@ -202,16 +244,16 @@ class _ConfiguracoesListaDeDesejosState
                                             ),
                                             SizedBox(
                                                 height: screenHeight * 0.005),
-                                            SingleChildScrollView(
-                                              scrollDirection: Axis.horizontal,
-                                              child: Row(
-                                                children: [
-                                                  // Trocar pelo nome das categorias quando a API estiver pronta
-                                                  _buildCategory('Aventura'),
-                                                  _buildCategory('Biografia'),
-                                                ],
-                                              ),
-                                            ),
+                                            // SingleChildScrollView(
+                                            //   scrollDirection: Axis.horizontal,
+                                            //   child: Row(
+                                            //     children: [
+                                            //       //Trocar pelo nome das categorias quando a API estiver pronta
+                                            //       _buildCategory('Aventura'),
+                                            //       _buildCategory('Biografia'),
+                                            //     ],
+                                            //   ),
+                                            // ),
                                             SizedBox(
                                                 height: screenHeight * 0.01),
                                             Row(
@@ -231,9 +273,10 @@ class _ConfiguracoesListaDeDesejosState
                                       Column(
                                         children: [
                                           IconButton(
-                                            icon: const Icon(
-                                              Icons.delete,
-                                              color: Color(0xffcd4e4e),
+                                            icon: Icon(
+                                              Icons.add,
+                                              color: const Color(0xff4e90cd),
+                                              size: screenWidth * 0.08,
                                             ),
                                             onPressed: () async {
                                               SharedPreferences prefs =
@@ -241,13 +284,11 @@ class _ConfiguracoesListaDeDesejosState
                                                       .getInstance();
                                               String id =
                                                   prefs.getString('userId')!;
+                                              bool addDesejoSuccess =
+                                                  await _handleAddDesejo(
+                                                      id, livro.id);
 
-                                              bool deleteDesejoSuccess =
-                                                  await _handleDeleteDesejo(
-                                                      id, desejo.livID);
-
-                                              if (deleteDesejoSuccess &&
-                                                  mounted) {
+                                              if (addDesejoSuccess && mounted) {
                                                 ScaffoldMessenger.of(context)
                                                     .hideCurrentSnackBar();
 
@@ -255,7 +296,7 @@ class _ConfiguracoesListaDeDesejosState
                                                     .showSnackBar(
                                                   SnackBar(
                                                     content: Text(
-                                                      'Livro removido da lista de desejos com sucesso',
+                                                      'Livro adicionado à lista de desejos!',
                                                       style: TextStyle(
                                                         fontFamily: 'Poppins',
                                                         fontSize:
@@ -269,15 +310,6 @@ class _ConfiguracoesListaDeDesejosState
                                                         const Color(0xff4ecd72),
                                                   ),
                                                 );
-
-                                                Navigator.pushReplacement(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                    builder: (BuildContext
-                                                            context) =>
-                                                        super.widget,
-                                                  ),
-                                                );
                                               } else if (mounted) {
                                                 ScaffoldMessenger.of(context)
                                                     .hideCurrentSnackBar();
@@ -285,7 +317,7 @@ class _ConfiguracoesListaDeDesejosState
                                                     .showSnackBar(
                                                   SnackBar(
                                                     content: Text(
-                                                      'Falha ao remover livro da lista de desejos',
+                                                      'Falha ao adicionar livro à lista de desejos',
                                                       style: TextStyle(
                                                         fontFamily: 'Poppins',
                                                         fontSize:
@@ -311,7 +343,6 @@ class _ConfiguracoesListaDeDesejosState
                             },
                           ),
                         ),
-                        SizedBox(height: screenHeight * 0.1),
                       ],
                     ),
                   ),
@@ -320,61 +351,26 @@ class _ConfiguracoesListaDeDesejosState
             },
           ),
 
-          // ==============================================================================
+          // ====================================================================
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-                builder: (BuildContext context) =>
-                    const ConfiguracoesListaDeDesejos1()),
-          );
-        },
-        backgroundColor: const Color(0xff4e90cd),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(screenWidth * 0.15),
-        ),
-        child: Icon(
-          Icons.add,
-          color: const Color(0xfff6f5f2),
-          size: screenWidth * 0.1,
-        ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 
-  Widget _buildCategory(String text) {
-    double screenWidth = MediaQuery.of(context).size.width;
-
-    double responsiveFontSize(double fontSize) {
-      return fontSize * screenWidth / 375.0;
-    }
-
-    return Container(
-      margin: EdgeInsets.only(right: screenWidth * 0.015),
-      padding: EdgeInsets.all(screenWidth * 0.014),
-      decoration: BoxDecoration(
-        color: const Color(0xffbabdd3),
-        borderRadius: BorderRadius.circular(20.0),
-      ),
-      child: Text(
-        text,
-        style: TextStyle(
-          fontFamily: 'Poppins',
-          fontSize: responsiveFontSize(11.0),
-          color: const Color(0xff14131a),
-        ),
-      ),
-    );
-  }
-
-  // método para lidar com a remoção de um livro da lista de desejos
-  Future<bool> _handleDeleteDesejo(String id, String idLivro) async {
+  // método para lidar com a pesquisa de livros
+  Future<bool> _handlePesquisarProdutos(String query) async {
     try {
-      await desejoStore.deleteDesejo(id, idLivro);
+      await produtoStore.pesquisarProdutos(query);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  // método para lidar com o adicionar livro na lista de desejos
+  Future<bool> _handleAddDesejo(String id, String idLivro) async {
+    try {
+      await desejoStore.addDesejo(id, idLivro);
       return true;
     } catch (e) {
       return false;
