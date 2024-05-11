@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:projeto_pagina/services/authentication_service.dart';
 import 'package:projeto_pagina/telas/cadastro_1.dart';
+import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 
 class Cadastro extends StatefulWidget {
   const Cadastro({super.key});
@@ -10,6 +12,14 @@ class Cadastro extends StatefulWidget {
 
 class _CadastroState extends State<Cadastro> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _birthDateController =
+      MaskedTextController(mask: '00/00/0000');
+  final TextEditingController _cpfController = TextEditingController();
+  final TextEditingController _phoneNumberController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
@@ -44,6 +54,7 @@ class _CadastroState extends State<Cadastro> {
                   style: TextStyle(
                     color: const Color(0xfff6f5f2),
                     fontSize: responsiveFontSize(23.7),
+                    fontFamily: 'Poppins',
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -65,6 +76,8 @@ class _CadastroState extends State<Cadastro> {
                           'Dados Pessoais',
                           style: TextStyle(
                             fontSize: responsiveFontSize(22.0),
+                            color: const Color(0xff14131a),
+                            fontFamily: 'Poppins',
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -72,6 +85,7 @@ class _CadastroState extends State<Cadastro> {
                     ),
                     SizedBox(height: screenHeight * 0.05),
                     TextFormField(
+                      controller: _nameController,
                       maxLength: 100,
                       validator: _validateRequiredField,
                       decoration: InputDecoration(
@@ -96,8 +110,15 @@ class _CadastroState extends State<Cadastro> {
                         ),
                         floatingLabelBehavior: FloatingLabelBehavior.always,
                         labelStyle: TextStyle(
-                          fontSize: responsiveFontSize(19.5),
+                          fontSize: responsiveFontSize(17.0),
+                          fontFamily: 'Poppins',
+                          color: const Color(0xff14131a),
                           fontWeight: FontWeight.bold,
+                        ),
+                        hintStyle: TextStyle(
+                          fontSize: responsiveFontSize(13.5),
+                          fontFamily: 'Poppins',
+                          color: const Color(0xff14131a),
                         ),
                       ),
                     ),
@@ -106,6 +127,7 @@ class _CadastroState extends State<Cadastro> {
                       children: [
                         Expanded(
                           child: TextFormField(
+                            controller: _birthDateController,
                             // PERGUNTAR O QUE VAI RECEBER NA DATA DE NASC
                             maxLength: 10,
                             validator: _validateRequiredField,
@@ -136,8 +158,15 @@ class _CadastroState extends State<Cadastro> {
                               floatingLabelBehavior:
                                   FloatingLabelBehavior.always,
                               labelStyle: TextStyle(
-                                fontSize: responsiveFontSize(19.5),
+                                fontSize: responsiveFontSize(17.0),
+                                fontFamily: 'Poppins',
+                                color: const Color(0xff14131a),
                                 fontWeight: FontWeight.bold,
+                              ),
+                              hintStyle: TextStyle(
+                                fontSize: responsiveFontSize(13.5),
+                                fontFamily: 'Poppins',
+                                color: const Color(0xff14131a),
                               ),
                             ),
                           ),
@@ -148,6 +177,7 @@ class _CadastroState extends State<Cadastro> {
                         ),
                         Expanded(
                           child: TextFormField(
+                            controller: _cpfController,
                             maxLength: 11,
                             validator: _validateRequiredField,
                             keyboardType: TextInputType.phone,
@@ -175,8 +205,15 @@ class _CadastroState extends State<Cadastro> {
                               floatingLabelBehavior:
                                   FloatingLabelBehavior.always,
                               labelStyle: TextStyle(
-                                fontSize: responsiveFontSize(19.5),
+                                fontSize: responsiveFontSize(17.0),
+                                fontFamily: 'Poppins',
+                                color: const Color(0xff14131a),
                                 fontWeight: FontWeight.bold,
+                              ),
+                              hintStyle: TextStyle(
+                                fontSize: responsiveFontSize(13.5),
+                                fontFamily: 'Poppins',
+                                color: const Color(0xff14131a),
                               ),
                             ),
                           ),
@@ -184,6 +221,7 @@ class _CadastroState extends State<Cadastro> {
                       ],
                     ),
                     TextFormField(
+                      controller: _phoneNumberController,
                       maxLength: 11,
                       validator: _validateRequiredField,
                       keyboardType: TextInputType.phone,
@@ -210,13 +248,21 @@ class _CadastroState extends State<Cadastro> {
                         ),
                         floatingLabelBehavior: FloatingLabelBehavior.always,
                         labelStyle: TextStyle(
-                          fontSize: responsiveFontSize(19.5),
+                          fontSize: responsiveFontSize(17.0),
+                          fontFamily: 'Poppins',
+                          color: const Color(0xff14131a),
                           fontWeight: FontWeight.bold,
+                        ),
+                        hintStyle: TextStyle(
+                          fontSize: responsiveFontSize(13.5),
+                          fontFamily: 'Poppins',
+                          color: const Color(0xff14131a),
                         ),
                       ),
                     ),
                     SizedBox(height: screenHeight * 0.02),
                     TextFormField(
+                      controller: _emailController,
                       maxLength: 100,
                       validator: _validateRequiredField,
                       decoration: InputDecoration(
@@ -241,8 +287,15 @@ class _CadastroState extends State<Cadastro> {
                         ),
                         floatingLabelBehavior: FloatingLabelBehavior.always,
                         labelStyle: TextStyle(
-                          fontSize: responsiveFontSize(19.5),
+                          fontSize: responsiveFontSize(17.0),
+                          fontFamily: 'Poppins',
+                          color: const Color(0xff14131a),
                           fontWeight: FontWeight.bold,
+                        ),
+                        hintStyle: TextStyle(
+                          fontSize: responsiveFontSize(13.5),
+                          fontFamily: 'Poppins',
+                          color: const Color(0xff14131a),
                         ),
                       ),
                     ),
@@ -251,6 +304,7 @@ class _CadastroState extends State<Cadastro> {
                       children: [
                         Expanded(
                           child: TextFormField(
+                            controller: _passwordController,
                             maxLength: 100,
                             validator: _validateRequiredField,
                             obscureText: true,
@@ -277,8 +331,15 @@ class _CadastroState extends State<Cadastro> {
                               floatingLabelBehavior:
                                   FloatingLabelBehavior.always,
                               labelStyle: TextStyle(
-                                fontSize: responsiveFontSize(19.5),
+                                fontSize: responsiveFontSize(17.0),
+                                fontFamily: 'Poppins',
+                                color: const Color(0xff14131a),
                                 fontWeight: FontWeight.bold,
+                              ),
+                              hintStyle: TextStyle(
+                                fontSize: responsiveFontSize(13.5),
+                                fontFamily: 'Poppins',
+                                color: const Color(0xff14131a),
                               ),
                             ),
                           ),
@@ -315,8 +376,15 @@ class _CadastroState extends State<Cadastro> {
                               floatingLabelBehavior:
                                   FloatingLabelBehavior.always,
                               labelStyle: TextStyle(
-                                fontSize: responsiveFontSize(19.5),
+                                fontSize: responsiveFontSize(17.0),
+                                fontFamily: 'Poppins',
+                                color: const Color(0xff14131a),
                                 fontWeight: FontWeight.bold,
+                              ),
+                              hintStyle: TextStyle(
+                                fontSize: responsiveFontSize(13.5),
+                                fontFamily: 'Poppins',
+                                color: const Color(0xff14131a),
                               ),
                             ),
                           ),
@@ -329,20 +397,36 @@ class _CadastroState extends State<Cadastro> {
                       children: [
                         ElevatedButton(
                           onPressed: () {
-                            // if (_formKey.currentState?.validate() ?? false) {
-                            //   Navigator.push(
-                            //     context,
-                            //     MaterialPageRoute(
-                            //         builder: (context) => const Cadastro1()),
-                            //   );
-                            // }
+                            if (_formKey.currentState?.validate() ?? false) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => Cadastro1(
+                                          name: _nameController.text,
+                                          birthDate: _birthDateController.text,
+                                          cpf: _cpfController.text,
+                                          phoneNumber:
+                                              _phoneNumberController.text,
+                                          email: _emailController.text,
+                                          password: _passwordController.text,
+                                        )),
+                              );
+                            }
 
                             // temporario
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => const Cadastro1()),
-                            );
+                            // Navigator.push(
+                            //   context,
+                            //   MaterialPageRoute(
+                            //       builder: (context) => const Cadastro1()),
+                            // );
+                            // AuthenticationService().registerUser(
+                            //   _nameController.text,
+                            //   _emailController.text,
+                            //   _passwordController.text,
+                            //   _phoneNumberController.text,
+                            //   _birthDateController.text,
+                            //   _cpfController.text,
+                            // );
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xff4e90cd),
@@ -353,8 +437,10 @@ class _CadastroState extends State<Cadastro> {
                           ),
                           child: Text(
                             "Próximo",
-                            style:
-                                TextStyle(fontSize: responsiveFontSize(17.0)),
+                            style: TextStyle(
+                              fontSize: responsiveFontSize(17.0),
+                              fontFamily: 'Poppins',
+                            ),
                           ),
                         ),
                         SizedBox(height: screenHeight * 0.02),
@@ -366,6 +452,7 @@ class _CadastroState extends State<Cadastro> {
                             "Cancelar",
                             style: TextStyle(
                               color: Color(0xff1f1d34),
+                              fontFamily: 'Poppins',
                               decoration: TextDecoration.underline,
                               fontWeight: FontWeight.bold,
                             ),
