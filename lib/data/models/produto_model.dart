@@ -5,7 +5,9 @@ class ProdutoModel {
   final String sinopse;
   final String isbn;
   final String autor;
+  final String autID;
   final String editora;
+  final String ediID;
 
   ProdutoModel({
     required this.id,
@@ -14,7 +16,9 @@ class ProdutoModel {
     required this.sinopse,
     required this.isbn,
     required this.autor,
+    required this.autID,
     required this.editora,
+    required this.ediID,
   });
 
   factory ProdutoModel.fromJson(Map<String, dynamic> json) {
@@ -24,8 +28,10 @@ class ProdutoModel {
       ano: json['liv_Ano'],
       sinopse: json['liv_Sinopse'],
       isbn: json['liv_ISBN'],
-      autor: json['liv_aut_id'],
-      editora: json['liv_edi_id'],
+      autor: json['autor']['aut_Nome'],
+      autID: json['autor']['aut_Id'],
+      editora: json['editora']['edi_Nome'],
+      ediID: json['editora']['edi_Id'],
     );
   }
 }
