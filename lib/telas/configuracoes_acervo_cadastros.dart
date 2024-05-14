@@ -315,10 +315,11 @@ class _ConfiguracoesAcervoCadastrosState
                                                                 Axis.horizontal,
                                                             child: Row(
                                                               children: [
-                                                                _buildCategory(
-                                                                    'Aventura'),
-                                                                _buildCategory(
-                                                                    'Biografia'),
+                                                                for (var categoria
+                                                                    in exemplarDetalhes
+                                                                        .categorias)
+                                                                  _buildCategory(
+                                                                      categoria),
                                                               ],
                                                             ),
                                                           ),
