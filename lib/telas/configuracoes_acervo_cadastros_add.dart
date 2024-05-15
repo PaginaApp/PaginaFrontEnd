@@ -1,4 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:projeto_pagina/data/models/estado_capa_model.dart';
+import 'package:projeto_pagina/data/models/estado_paginas_model.dart';
+import 'package:projeto_pagina/data/repositories/produto_repository.dart';
+import 'package:projeto_pagina/services/estado_capa_service.dart';
+import 'package:projeto_pagina/services/estado_paginas_service.dart';
+import 'package:projeto_pagina/stores/produto_store.dart';
 
 class ConfiguracoesAcervoCadastrosAdd extends StatefulWidget {
   const ConfiguracoesAcervoCadastrosAdd({super.key});
@@ -11,14 +17,42 @@ class ConfiguracoesAcervoCadastrosAdd extends StatefulWidget {
 class _ConfiguracoesAcervoCadastrosAddState
     extends State<ConfiguracoesAcervoCadastrosAdd> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
   List<bool> isPageStateSelected = [false, false, false];
+  String selectedPageStateId = '';
+
   List<bool> isCoverStateSelected = [false, false, false];
+  String selectedCoverStateId = '';
+
   bool isDonationSelected = false;
   bool isLoanSelected = false;
   bool isExchangeSelected = false;
   bool isSaleSelected = false;
   bool isNoneSelected = false;
+
   String dropdownValue = 'Selecione';
+
+  // text controller para os campos de texto
+  final TextEditingController isbnController = TextEditingController();
+  final TextEditingController titleController = TextEditingController();
+  final TextEditingController authorController = TextEditingController();
+  final TextEditingController publisherController = TextEditingController();
+  final TextEditingController yearController = TextEditingController();
+  final TextEditingController synopsisController = TextEditingController();
+  final TextEditingController descriptionController = TextEditingController();
+
+  final TextEditingController priceController = TextEditingController();
+  final TextEditingController daysController = TextEditingController();
+
+  final ProdutoStore produtoStore = ProdutoStore(
+    produtoRepository: ProdutoRepository(),
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    produtoStore.getProdutos(1, 50);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,6 +90,153 @@ class _ConfiguracoesAcervoCadastrosAddState
                   ),
                 ),
               ),
+
+              // -----------------------------------------------------
+
+              AnimatedBuilder(
+                animation: Listenable.merge([
+                  produtoStore.isLoading,
+                  produtoStore.error,
+                  produtoStore.state,
+                ]),
+                builder: (context, child) {
+                  if (produtoStore.isLoading.value) {
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  }
+
+                  if (produtoStore.error.value.isNotEmpty) {
+                    return Center(
+                      child: Text(
+                        "Falha ao carregar livros, verifique sua conexão",
+                        style: TextStyle(
+                          color: const Color(0xffcd4e4e),
+                          fontSize: responsiveFontSize(14.0),
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'Poppins',
+                        ),
+                      ),
+                    );
+                  }
+
+                  if (produtoStore.state.value.isEmpty) {
+                    return Center(
+                      child: Text(
+                        'Nenhum livro encontrado',
+                        style: TextStyle(
+                          color: const Color(0xff14131a),
+                          fontSize: responsiveFontSize(14.0),
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'Poppins',
+                        ),
+                      ),
+                    );
+                  } else {
+                    return Row(
+                      children: [
+                        Expanded(
+                          child: Padding(
+                            padding: EdgeInsets.all(screenWidth * 0.07),
+                            child: TextField(
+                              onSubmitted: (query) async {
+                                bool success =
+                                    await _handlePesquisarProdutos(query);
+
+                                //bool success = true;
+
+                                if (success && mounted) {
+                                  ScaffoldMessenger.of(context)
+                                      .hideCurrentSnackBar();
+
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        'Livro encontrado com sucesso!',
+                                        style: TextStyle(
+                                          fontFamily: 'Poppins',
+                                          fontSize: responsiveFontSize(16.0),
+                                        ),
+                                      ),
+                                      duration: const Duration(seconds: 5),
+                                      backgroundColor: const Color(0xff4ecd72),
+                                    ),
+                                  );
+                                  final livro = produtoStore.state.value[0];
+
+                                  isbnController.text = livro.isbn;
+                                  titleController.text = livro.titulo;
+                                  authorController.text = livro.autor;
+                                  publisherController.text = livro.editora;
+                                  yearController.text = livro.ano;
+                                  synopsisController.text = livro.sinopse;
+                                } else if (mounted) {
+                                  ScaffoldMessenger.of(context)
+                                      .hideCurrentSnackBar();
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        'Livro não encontrado!',
+                                        style: TextStyle(
+                                          fontFamily: 'Poppins',
+                                          fontSize: responsiveFontSize(16.0),
+                                        ),
+                                      ),
+                                      duration: const Duration(seconds: 5),
+                                      backgroundColor: const Color(0xffec4e4e),
+                                    ),
+                                  );
+                                  Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (BuildContext context) =>
+                                          super.widget,
+                                    ),
+                                  );
+                                  isbnController.clear();
+                                  titleController.clear();
+                                  authorController.clear();
+                                  publisherController.clear();
+                                  yearController.clear();
+                                  synopsisController.clear();
+                                }
+                              },
+                              decoration: InputDecoration(
+                                hintText:
+                                    'Pesquise um livro por ISBN ou título',
+                                hintStyle: TextStyle(
+                                  color: const Color(0xff14131a),
+                                  fontFamily: 'Poppins',
+                                  fontSize: responsiveFontSize(14.0),
+                                ),
+                                fillColor: const Color(0xfff6f5f2),
+                                filled: true,
+                                prefixIcon: const Icon(Icons.search),
+                                enabledBorder: const OutlineInputBorder(
+                                  borderSide:
+                                      BorderSide(color: Color(0xff4e90cd)),
+                                  borderRadius: BorderRadius.all(
+                                    Radius.circular(8.0),
+                                  ),
+                                ),
+                                focusedBorder: const OutlineInputBorder(
+                                  borderSide:
+                                      BorderSide(color: Color(0xff4e90cd)),
+                                  borderRadius: BorderRadius.all(
+                                    Radius.circular(8.0),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  }
+                },
+              ),
+
+              // -----------------------------------------------------
               Padding(
                 padding: EdgeInsets.all(screenWidth * 0.03),
                 child: Column(
@@ -73,11 +254,13 @@ class _ConfiguracoesAcervoCadastrosAddState
                     ),
                     SizedBox(height: screenHeight * 0.05),
                     TextFormField(
+                      controller: isbnController,
+                      enabled: false,
                       maxLength: 100,
                       validator: _validateRequiredField,
                       decoration: InputDecoration(
                         labelText: 'ISBN',
-                        hintText: 'Insira o ISBN do livro...',
+                        hintText: 'ISBN do livro...',
                         contentPadding: EdgeInsets.symmetric(
                             horizontal: screenHeight * 0.02),
                         border: OutlineInputBorder(
@@ -99,11 +282,13 @@ class _ConfiguracoesAcervoCadastrosAddState
                     ),
                     SizedBox(height: screenHeight * 0.03),
                     TextFormField(
+                      controller: titleController,
+                      enabled: false,
                       maxLength: 100,
                       validator: _validateRequiredField,
                       decoration: InputDecoration(
                         labelText: 'Título',
-                        hintText: 'Insira o título do livro...',
+                        hintText: 'Título do livro...',
                         contentPadding: EdgeInsets.symmetric(
                             horizontal: screenHeight * 0.02),
                         border: OutlineInputBorder(
@@ -137,11 +322,13 @@ class _ConfiguracoesAcervoCadastrosAddState
                     ),
                     SizedBox(height: screenHeight * 0.03),
                     TextFormField(
+                      controller: authorController,
+                      enabled: false,
                       maxLength: 100,
                       validator: _validateRequiredField,
                       decoration: InputDecoration(
                         labelText: 'Autor(a)',
-                        hintText: 'Insira o autor(a) do livro...',
+                        hintText: 'Autor(a) do livro...',
                         contentPadding: EdgeInsets.symmetric(
                             horizontal: screenHeight * 0.02),
                         border: OutlineInputBorder(
@@ -163,11 +350,13 @@ class _ConfiguracoesAcervoCadastrosAddState
                     ),
                     SizedBox(height: screenHeight * 0.03),
                     TextFormField(
+                      controller: publisherController,
+                      enabled: false,
                       maxLength: 100,
                       validator: _validateRequiredField,
                       decoration: InputDecoration(
                         labelText: 'Editora',
-                        hintText: 'Insira a editora do livro...',
+                        hintText: 'Editora do livro...',
                         contentPadding: EdgeInsets.symmetric(
                             horizontal: screenHeight * 0.02),
                         border: OutlineInputBorder(
@@ -189,12 +378,14 @@ class _ConfiguracoesAcervoCadastrosAddState
                     ),
                     SizedBox(height: screenHeight * 0.03),
                     TextFormField(
+                      controller: yearController,
+                      enabled: false,
                       maxLength: 4,
                       keyboardType: TextInputType.number,
                       validator: _validateRequiredField,
                       decoration: InputDecoration(
                         labelText: 'Ano de publicação',
-                        hintText: 'Insira o ano de publicação do livro...',
+                        hintText: 'Ano de publicação do livro...',
                         contentPadding: EdgeInsets.symmetric(
                             horizontal: screenHeight * 0.02),
                         border: OutlineInputBorder(
@@ -216,10 +407,12 @@ class _ConfiguracoesAcervoCadastrosAddState
                     ),
                     SizedBox(height: screenHeight * 0.03),
                     TextFormField(
+                      controller: synopsisController,
+                      enabled: false,
                       validator: _validateRequiredField,
                       decoration: InputDecoration(
                         labelText: 'Sinopse',
-                        hintText: 'Insira a sinopse do livro...',
+                        hintText: 'Sinopse do livro...',
                         contentPadding: EdgeInsets.symmetric(
                             horizontal: screenHeight * 0.02),
                         border: OutlineInputBorder(
@@ -259,15 +452,48 @@ class _ConfiguracoesAcervoCadastrosAddState
                       ),
                     ),
                     SizedBox(height: screenHeight * 0.01),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      // exemplo de estado de conservação
-                      children: [
-                        _buildCoverState('Ótimo estado', 0),
-                        _buildCoverState('Estado regular', 1),
-                        _buildCoverState('Péssimo estado', 2),
-                      ],
+                    // ------------------------------
+                    // ESTADOS DE CONSERVAÇÃO DA CAPA
+
+                    FutureBuilder<List<EstadoCapaModel>>(
+                      future: EstadoCapaService().fetchEstadoCapa(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        } else if (snapshot.hasError) {
+                          return Center(
+                            child: Text(
+                              'Erro ao carregar estados de conservação da capa',
+                              style: TextStyle(
+                                color: const Color(0xffcd4e4e),
+                                fontSize: responsiveFontSize(14.0),
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                          );
+                        } else {
+                          final estadoCapa = snapshot.data!;
+                          return Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            // exemplo de estado de conservação
+                            children: [
+                              _buildCoverState(
+                                  estadoCapa[2].nome, 0, estadoCapa[2].id),
+                              _buildCoverState(
+                                  estadoCapa[0].nome, 1, estadoCapa[0].id),
+                              _buildCoverState(
+                                  estadoCapa[1].nome, 2, estadoCapa[1].id),
+                            ],
+                          );
+                        }
+                      },
                     ),
+                    // ------------------------------
+
                     SizedBox(height: screenHeight * 0.03),
                     Text(
                       'Páginas',
@@ -278,15 +504,46 @@ class _ConfiguracoesAcervoCadastrosAddState
                       ),
                     ),
                     SizedBox(height: screenHeight * 0.01),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      // exemplo de estado de conservação
-                      children: [
-                        _buildPagesState('Ótimo estado', 0),
-                        _buildPagesState('Estado regular', 1),
-                        _buildPagesState('Péssimo estado', 2),
-                      ],
+                    // ------------------------------
+                    // ESTADOS DE CONSERVAÇÃO DAS PÁGINAS
+                    FutureBuilder<List<EstadoPaginasModel>>(
+                      future: EstadoPaginasService().fetchEstadoPaginas(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        } else if (snapshot.hasError) {
+                          return Center(
+                            child: Text(
+                              'Erro ao carregar estados de conservação da página',
+                              style: TextStyle(
+                                color: const Color(0xffcd4e4e),
+                                fontSize: responsiveFontSize(14.0),
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                          );
+                        } else {
+                          final estadoPaginas = snapshot.data!;
+                          return Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              _buildPagesState(estadoPaginas[1].nome, 0,
+                                  estadoPaginas[1].id),
+                              _buildPagesState(estadoPaginas[2].nome, 1,
+                                  estadoPaginas[2].id),
+                              _buildPagesState(estadoPaginas[0].nome, 2,
+                                  estadoPaginas[0].id),
+                            ],
+                          );
+                        }
+                      },
                     ),
+
+                    // ------------------------------
                     SizedBox(height: screenHeight * 0.05),
                     TextFormField(
                       validator: _validateRequiredField,
@@ -322,22 +579,16 @@ class _ConfiguracoesAcervoCadastrosAddState
                         color: const Color(0xff14131a),
                       ),
                     ),
+                    // ==============================================================
                     SizedBox(height: screenHeight * 0.02),
+                    _buildNoneButton(),
                     _buildDonationButton(),
                     _buildLoanButton(),
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          'Período',
-                          style: TextStyle(
-                            fontFamily: 'Poppins',
-                            fontSize: responsiveFontSize(14.0),
-                            color: const Color(0xff14131a),
-                          ),
-                        ),
-                        Text(
-                          'Quantidade',
+                          'Quantidade de dias:',
                           style: TextStyle(
                             fontFamily: 'Poppins',
                             fontSize: responsiveFontSize(14.0),
@@ -348,68 +599,15 @@ class _ConfiguracoesAcervoCadastrosAddState
                     ),
                     SizedBox(height: screenHeight * 0.02),
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Container(
-                          padding: EdgeInsets.symmetric(
-                              horizontal: screenHeight * 0.02),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(8.0),
-                            border: Border.all(
-                              width: screenWidth * 0.00155,
-                            ),
-                          ),
-                          child: DropdownButtonHideUnderline(
-                            child: DropdownButton<String>(
-                              value: dropdownValue == 'Selecione'
-                                  ? null
-                                  : dropdownValue,
-                              hint: Text(
-                                'Selecione',
-                                style: TextStyle(
-                                  fontFamily: 'Poppins',
-                                  fontSize: responsiveFontSize(13.5),
-                                  color: const Color(0xff14131a),
-                                ),
-                              ),
-                              icon: const Icon(
-                                Icons.keyboard_arrow_down,
-                                color: Color(0xff4e90cd),
-                              ),
-                              iconSize: responsiveFontSize(25.0),
-                              style: TextStyle(
-                                fontFamily: 'Poppins',
-                                fontSize: responsiveFontSize(13.5),
-                                color: const Color(0xff14131a),
-                              ),
-                              onChanged: (String? newValue) {
-                                if (newValue != 'Selecione') {
-                                  setState(() {
-                                    dropdownValue = newValue!;
-                                  });
-                                }
-                              },
-                              items: <String>[
-                                'Selecione',
-                                'Semana',
-                                'Mês',
-                                'Ano'
-                              ].map<DropdownMenuItem<String>>((String value) {
-                                return DropdownMenuItem<String>(
-                                  value: value,
-                                  child: Text(value),
-                                );
-                              }).toList(),
-                            ),
-                          ),
-                        ),
-                        // ignore: sized_box_for_whitespace
-                        Container(
+                        SizedBox(
                           width: screenWidth * 0.3,
                           child: TextFormField(
+                            controller: daysController,
                             enabled: isLoanSelected,
                             keyboardType: TextInputType.number,
-                            validator: _validateRequiredField,
+                            //validator: _validateRequiredField,
                             decoration: InputDecoration(
                               hintText: '00',
                               contentPadding: EdgeInsets.symmetric(
@@ -434,8 +632,9 @@ class _ConfiguracoesAcervoCadastrosAddState
                     _buildSaleButton(),
                     SizedBox(height: screenHeight * 0.02),
                     TextFormField(
+                      controller: priceController,
                       enabled: isSaleSelected,
-                      validator: _validateRequiredField,
+                      //validator: _validateRequiredField,
                       decoration: InputDecoration(
                         labelText: 'Valor',
                         hintText: 'R\$ 0,00',
@@ -457,9 +656,8 @@ class _ConfiguracoesAcervoCadastrosAddState
                         ),
                       ),
                     ),
-                    SizedBox(height: screenHeight * 0.01),
-                    _buildNoneButton(),
-                    SizedBox(height: screenHeight * 0.15),
+                    // ==============================================================
+                    SizedBox(height: screenHeight * 0.05),
                     Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -491,7 +689,8 @@ class _ConfiguracoesAcervoCadastrosAddState
                             ElevatedButton(
                               onPressed: () {
                                 // fazer uma validação quando a API estiver pronta
-                                bool success = true;
+                                bool success =
+                                    _formKey.currentState?.validate() ?? false;
 
                                 String message = success
                                     ? "Livro cadastrado com sucesso!"
@@ -554,7 +753,7 @@ class _ConfiguracoesAcervoCadastrosAddState
     );
   }
 
-  Widget _buildCoverState(String text, int index) {
+  Widget _buildCoverState(String text, int index, String id) {
     Color color;
     IconData icon;
     double screenWidth = MediaQuery.of(context).size.width;
@@ -589,6 +788,7 @@ class _ConfiguracoesAcervoCadastrosAddState
           for (int i = 0; i < isCoverStateSelected.length; i++) {
             if (i == index) {
               isCoverStateSelected[i] = true;
+              selectedCoverStateId = id;
             } else {
               isCoverStateSelected[i] = false;
             }
@@ -642,7 +842,7 @@ class _ConfiguracoesAcervoCadastrosAddState
     );
   }
 
-  Widget _buildPagesState(String text, int index) {
+  Widget _buildPagesState(String text, int index, String id) {
     Color color;
     IconData icon;
     double screenWidth = MediaQuery.of(context).size.width;
@@ -677,6 +877,7 @@ class _ConfiguracoesAcervoCadastrosAddState
           for (int i = 0; i < isPageStateSelected.length; i++) {
             if (i == index) {
               isPageStateSelected[i] = true;
+              selectedPageStateId = id;
             } else {
               isPageStateSelected[i] = false;
             }
@@ -741,17 +942,19 @@ class _ConfiguracoesAcervoCadastrosAddState
     return Row(
       children: [
         InkWell(
-          onTap: () {
-            setState(() {
-              isDonationSelected = !isDonationSelected;
-            });
-          },
+          onTap: isNoneSelected
+              ? null
+              : () {
+                  setState(() {
+                    isDonationSelected = !isDonationSelected;
+                  });
+                },
           child: Container(
             padding: EdgeInsets.symmetric(
                 vertical: screenHeight * 0.02, horizontal: screenWidth * 0.02),
             child: Row(
               children: [
-                isDonationSelected
+                isDonationSelected && !isNoneSelected
                     ? const Icon(
                         Icons.check_box,
                         color: Color(0xff1f1d34),
@@ -764,7 +967,9 @@ class _ConfiguracoesAcervoCadastrosAddState
                 Text(
                   'Doação',
                   style: TextStyle(
-                      color: const Color(0xff1f1d34),
+                      color: isNoneSelected
+                          ? const Color(0xffd3d3d3)
+                          : const Color(0xff1f1d34),
                       fontFamily: 'Poppins',
                       fontSize: responsiveFontSize(14.0)),
                 ),
@@ -787,17 +992,19 @@ class _ConfiguracoesAcervoCadastrosAddState
     return Row(
       children: [
         InkWell(
-          onTap: () {
-            setState(() {
-              isLoanSelected = !isLoanSelected;
-            });
-          },
+          onTap: isNoneSelected
+              ? null
+              : () {
+                  setState(() {
+                    isLoanSelected = !isLoanSelected;
+                  });
+                },
           child: Container(
             padding: EdgeInsets.symmetric(
                 vertical: screenHeight * 0.02, horizontal: screenWidth * 0.02),
             child: Row(
               children: [
-                isLoanSelected
+                isLoanSelected && !isNoneSelected
                     ? const Icon(
                         Icons.check_box,
                         color: Color(0xff1f1d34),
@@ -810,7 +1017,9 @@ class _ConfiguracoesAcervoCadastrosAddState
                 Text(
                   'Empréstimo',
                   style: TextStyle(
-                      color: const Color(0xff1f1d34),
+                      color: isNoneSelected
+                          ? const Color(0xffd3d3d3)
+                          : const Color(0xff1f1d34),
                       fontFamily: 'Poppins',
                       fontSize: responsiveFontSize(14.0)),
                 ),
@@ -833,17 +1042,19 @@ class _ConfiguracoesAcervoCadastrosAddState
     return Row(
       children: [
         InkWell(
-          onTap: () {
-            setState(() {
-              isExchangeSelected = !isExchangeSelected;
-            });
-          },
+          onTap: isNoneSelected
+              ? null
+              : () {
+                  setState(() {
+                    isExchangeSelected = !isExchangeSelected;
+                  });
+                },
           child: Container(
             padding: EdgeInsets.symmetric(
                 vertical: screenHeight * 0.02, horizontal: screenWidth * 0.02),
             child: Row(
               children: [
-                isExchangeSelected
+                isExchangeSelected && !isNoneSelected
                     ? const Icon(
                         Icons.check_box,
                         color: Color(0xff1f1d34),
@@ -856,7 +1067,9 @@ class _ConfiguracoesAcervoCadastrosAddState
                 Text(
                   'Troca',
                   style: TextStyle(
-                      color: const Color(0xff1f1d34),
+                      color: isNoneSelected
+                          ? const Color(0xffd3d3d3)
+                          : const Color(0xff1f1d34),
                       fontFamily: 'Poppins',
                       fontSize: responsiveFontSize(14.0)),
                 ),
@@ -879,17 +1092,19 @@ class _ConfiguracoesAcervoCadastrosAddState
     return Row(
       children: [
         InkWell(
-          onTap: () {
-            setState(() {
-              isSaleSelected = !isSaleSelected;
-            });
-          },
+          onTap: isNoneSelected
+              ? null
+              : () {
+                  setState(() {
+                    isSaleSelected = !isSaleSelected;
+                  });
+                },
           child: Container(
             padding: EdgeInsets.symmetric(
                 vertical: screenHeight * 0.02, horizontal: screenWidth * 0.02),
             child: Row(
               children: [
-                isSaleSelected
+                isSaleSelected && !isNoneSelected
                     ? const Icon(
                         Icons.check_box,
                         color: Color(0xff1f1d34),
@@ -902,7 +1117,9 @@ class _ConfiguracoesAcervoCadastrosAddState
                 Text(
                   'Venda',
                   style: TextStyle(
-                      color: const Color(0xff1f1d34),
+                      color: isNoneSelected
+                          ? const Color(0xffd3d3d3)
+                          : const Color(0xff1f1d34),
                       fontFamily: 'Poppins',
                       fontSize: responsiveFontSize(14.0)),
                 ),
@@ -928,6 +1145,12 @@ class _ConfiguracoesAcervoCadastrosAddState
           onTap: () {
             setState(() {
               isNoneSelected = !isNoneSelected;
+              priceController.clear();
+              daysController.clear();
+              isDonationSelected = false;
+              isLoanSelected = false;
+              isExchangeSelected = false;
+              isSaleSelected = false;
             });
           },
           child: Container(
@@ -958,5 +1181,15 @@ class _ConfiguracoesAcervoCadastrosAddState
         ),
       ],
     );
+  }
+
+  // método para lidar com a pesquisa de livros
+  Future<bool> _handlePesquisarProdutos(String query) async {
+    try {
+      await produtoStore.pesquisarProdutos(query);
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 }
