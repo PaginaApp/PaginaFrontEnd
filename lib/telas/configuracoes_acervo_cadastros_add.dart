@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:projeto_pagina/data/models/estado_capa_model.dart';
 import 'package:projeto_pagina/data/models/estado_paginas_model.dart';
+import 'package:projeto_pagina/data/models/tipo_transacao_model.dart';
 import 'package:projeto_pagina/data/repositories/produto_repository.dart';
 import 'package:projeto_pagina/services/estado_capa_service.dart';
 import 'package:projeto_pagina/services/estado_paginas_service.dart';
+import 'package:projeto_pagina/services/tipo_transacao_service.dart';
 import 'package:projeto_pagina/stores/produto_store.dart';
 
 class ConfiguracoesAcervoCadastrosAdd extends StatefulWidget {
@@ -30,6 +32,8 @@ class _ConfiguracoesAcervoCadastrosAddState
   bool isSaleSelected = false;
   bool isNoneSelected = false;
 
+  List<String> selectedNegotiationTypes = [];
+
   String dropdownValue = 'Selecione';
 
   // text controller para os campos de texto
@@ -44,6 +48,10 @@ class _ConfiguracoesAcervoCadastrosAddState
   final TextEditingController priceController = TextEditingController();
   final TextEditingController daysController = TextEditingController();
 
+  Future<List<EstadoCapaModel>>? estadoCapaFuture;
+  Future<List<EstadoPaginasModel>>? estadoPaginasFuture;
+  Future<List<TipoTransacaoModel>>? tipoTransacaoFuture;
+
   final ProdutoStore produtoStore = ProdutoStore(
     produtoRepository: ProdutoRepository(),
   );
@@ -52,6 +60,9 @@ class _ConfiguracoesAcervoCadastrosAddState
   void initState() {
     super.initState();
     produtoStore.getProdutos(1, 50);
+    estadoCapaFuture = EstadoCapaService().fetchEstadoCapa();
+    estadoPaginasFuture = EstadoPaginasService().fetchEstadoPaginas();
+    tipoTransacaoFuture = TipoTransacaoService().fetchTipoTransacao();
   }
 
   @override
@@ -456,7 +467,7 @@ class _ConfiguracoesAcervoCadastrosAddState
                     // ESTADOS DE CONSERVAÇÃO DA CAPA
 
                     FutureBuilder<List<EstadoCapaModel>>(
-                      future: EstadoCapaService().fetchEstadoCapa(),
+                      future: estadoCapaFuture,
                       builder: (context, snapshot) {
                         if (snapshot.connectionState ==
                             ConnectionState.waiting) {
@@ -507,7 +518,7 @@ class _ConfiguracoesAcervoCadastrosAddState
                     // ------------------------------
                     // ESTADOS DE CONSERVAÇÃO DAS PÁGINAS
                     FutureBuilder<List<EstadoPaginasModel>>(
-                      future: EstadoPaginasService().fetchEstadoPaginas(),
+                      future: estadoPaginasFuture,
                       builder: (context, snapshot) {
                         if (snapshot.connectionState ==
                             ConnectionState.waiting) {
@@ -580,82 +591,127 @@ class _ConfiguracoesAcervoCadastrosAddState
                       ),
                     ),
                     // ==============================================================
-                    SizedBox(height: screenHeight * 0.02),
-                    _buildNoneButton(),
-                    _buildDonationButton(),
-                    _buildLoanButton(),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'Quantidade de dias:',
-                          style: TextStyle(
-                            fontFamily: 'Poppins',
-                            fontSize: responsiveFontSize(14.0),
-                            color: const Color(0xff14131a),
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: screenHeight * 0.02),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        SizedBox(
-                          width: screenWidth * 0.3,
-                          child: TextFormField(
-                            controller: daysController,
-                            enabled: isLoanSelected,
-                            keyboardType: TextInputType.number,
-                            //validator: _validateRequiredField,
-                            decoration: InputDecoration(
-                              hintText: '00',
-                              contentPadding: EdgeInsets.symmetric(
-                                  horizontal: screenHeight * 0.02),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8.0),
-                              ),
-                              floatingLabelBehavior:
-                                  FloatingLabelBehavior.always,
-                              hintStyle: TextStyle(
+
+                    // -----------------------------------------
+
+                    FutureBuilder<List<TipoTransacaoModel>>(
+                      future: tipoTransacaoFuture,
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        } else if (snapshot.hasError) {
+                          return Center(
+                            child: Text(
+                              'Erro ao carregar estados de conservação da página',
+                              style: TextStyle(
+                                color: const Color(0xffcd4e4e),
+                                fontSize: responsiveFontSize(14.0),
+                                fontWeight: FontWeight.bold,
                                 fontFamily: 'Poppins',
-                                fontSize: responsiveFontSize(13.5),
-                                color: const Color(0xff14131a),
                               ),
                             ),
-                          ),
-                        ),
-                      ],
+                          );
+                        } else {
+                          final tipoTransacao = snapshot.data!;
+                          Map<String, String> tipoTransacaoIds = {
+                            'loan': tipoTransacao[0].id,
+                            'sale': tipoTransacao[1].id,
+                            'donation': tipoTransacao[2].id,
+                            'exchange': tipoTransacao[3].id,
+                          };
+                          return Column(
+                            children: [
+                              SizedBox(height: screenHeight * 0.02),
+                              _buildNoneButton(),
+                              _buildDonationButton(
+                                  tipoTransacaoIds['donation']!),
+                              _buildLoanButton(tipoTransacaoIds['loan']!),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    'Quantidade de dias:',
+                                    style: TextStyle(
+                                      fontFamily: 'Poppins',
+                                      fontSize: responsiveFontSize(14.0),
+                                      color: const Color(0xff14131a),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: screenHeight * 0.02),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  SizedBox(
+                                    width: screenWidth * 0.3,
+                                    child: TextFormField(
+                                      controller: daysController,
+                                      enabled: isLoanSelected,
+                                      keyboardType: TextInputType.number,
+                                      //validator: _validateRequiredField,
+                                      decoration: InputDecoration(
+                                        hintText: '00',
+                                        contentPadding: EdgeInsets.symmetric(
+                                            horizontal: screenHeight * 0.02),
+                                        border: OutlineInputBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(8.0),
+                                        ),
+                                        floatingLabelBehavior:
+                                            FloatingLabelBehavior.always,
+                                        hintStyle: TextStyle(
+                                          fontFamily: 'Poppins',
+                                          fontSize: responsiveFontSize(13.5),
+                                          color: const Color(0xff14131a),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: screenHeight * 0.015),
+                              _buildExchangeButton(
+                                  tipoTransacaoIds['exchange']!),
+                              _buildSaleButton(tipoTransacaoIds['sale']!),
+                              SizedBox(height: screenHeight * 0.02),
+                              TextFormField(
+                                controller: priceController,
+                                enabled: isSaleSelected,
+                                //validator: _validateRequiredField,
+                                decoration: InputDecoration(
+                                  labelText: 'Valor',
+                                  hintText: 'R\$ 0,00',
+                                  contentPadding: EdgeInsets.symmetric(
+                                      horizontal: screenHeight * 0.02),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8.0),
+                                  ),
+                                  floatingLabelBehavior:
+                                      FloatingLabelBehavior.always,
+                                  labelStyle: TextStyle(
+                                    fontFamily: 'Poppins',
+                                    fontSize: responsiveFontSize(18.0),
+                                    color: const Color(0xff14131a),
+                                  ),
+                                  hintStyle: TextStyle(
+                                    fontFamily: 'Poppins',
+                                    fontSize: responsiveFontSize(13.5),
+                                    color: const Color(0xff14131a),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          );
+                        }
+                      },
                     ),
-                    SizedBox(height: screenHeight * 0.015),
-                    _buildExchangeButton(),
-                    _buildSaleButton(),
-                    SizedBox(height: screenHeight * 0.02),
-                    TextFormField(
-                      controller: priceController,
-                      enabled: isSaleSelected,
-                      //validator: _validateRequiredField,
-                      decoration: InputDecoration(
-                        labelText: 'Valor',
-                        hintText: 'R\$ 0,00',
-                        contentPadding: EdgeInsets.symmetric(
-                            horizontal: screenHeight * 0.02),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                        ),
-                        floatingLabelBehavior: FloatingLabelBehavior.always,
-                        labelStyle: TextStyle(
-                          fontFamily: 'Poppins',
-                          fontSize: responsiveFontSize(18.0),
-                          color: const Color(0xff14131a),
-                        ),
-                        hintStyle: TextStyle(
-                          fontFamily: 'Poppins',
-                          fontSize: responsiveFontSize(13.5),
-                          color: const Color(0xff14131a),
-                        ),
-                      ),
-                    ),
+
+                    // -----------------------------------------
+
                     // ==============================================================
                     SizedBox(height: screenHeight * 0.05),
                     Column(
@@ -931,7 +987,7 @@ class _ConfiguracoesAcervoCadastrosAddState
     );
   }
 
-  Widget _buildDonationButton() {
+  Widget _buildDonationButton(String id) {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
 
@@ -947,6 +1003,11 @@ class _ConfiguracoesAcervoCadastrosAddState
               : () {
                   setState(() {
                     isDonationSelected = !isDonationSelected;
+                    if (isDonationSelected) {
+                      selectedNegotiationTypes.add(id);
+                    } else {
+                      selectedNegotiationTypes.remove(id);
+                    }
                   });
                 },
           child: Container(
@@ -981,7 +1042,7 @@ class _ConfiguracoesAcervoCadastrosAddState
     );
   }
 
-  Widget _buildLoanButton() {
+  Widget _buildLoanButton(String id) {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
 
@@ -997,6 +1058,12 @@ class _ConfiguracoesAcervoCadastrosAddState
               : () {
                   setState(() {
                     isLoanSelected = !isLoanSelected;
+                    if (isLoanSelected) {
+                      selectedNegotiationTypes.add(id);
+                    } else {
+                      selectedNegotiationTypes.remove(id);
+                      daysController.clear();
+                    }
                   });
                 },
           child: Container(
@@ -1031,7 +1098,7 @@ class _ConfiguracoesAcervoCadastrosAddState
     );
   }
 
-  Widget _buildExchangeButton() {
+  Widget _buildExchangeButton(String id) {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
 
@@ -1047,6 +1114,11 @@ class _ConfiguracoesAcervoCadastrosAddState
               : () {
                   setState(() {
                     isExchangeSelected = !isExchangeSelected;
+                    if (isExchangeSelected) {
+                      selectedNegotiationTypes.add(id);
+                    } else {
+                      selectedNegotiationTypes.remove(id);
+                    }
                   });
                 },
           child: Container(
@@ -1081,7 +1153,7 @@ class _ConfiguracoesAcervoCadastrosAddState
     );
   }
 
-  Widget _buildSaleButton() {
+  Widget _buildSaleButton(String id) {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
 
@@ -1097,6 +1169,12 @@ class _ConfiguracoesAcervoCadastrosAddState
               : () {
                   setState(() {
                     isSaleSelected = !isSaleSelected;
+                    if (isSaleSelected) {
+                      selectedNegotiationTypes.add(id);
+                    } else {
+                      selectedNegotiationTypes.remove(id);
+                      priceController.clear();
+                    }
                   });
                 },
           child: Container(
