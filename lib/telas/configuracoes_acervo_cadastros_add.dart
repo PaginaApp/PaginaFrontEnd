@@ -120,7 +120,7 @@ class _ConfiguracoesAcervoCadastrosAddState
                   if (produtoStore.error.value.isNotEmpty) {
                     return Center(
                       child: Text(
-                        "Falha ao carregar livros, verifique sua conexão",
+                        "Falha ao carregar barra de pesquisa, verifique sua conexão",
                         style: TextStyle(
                           color: const Color(0xffcd4e4e),
                           fontSize: responsiveFontSize(14.0),
@@ -605,7 +605,7 @@ class _ConfiguracoesAcervoCadastrosAddState
                         } else if (snapshot.hasError) {
                           return Center(
                             child: Text(
-                              'Erro ao carregar estados de conservação da página',
+                              'Erro ao carregar tipos de negociação',
                               style: TextStyle(
                                 color: const Color(0xffcd4e4e),
                                 fontSize: responsiveFontSize(14.0),
