@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:projeto_pagina/data/models/estado_capa_model.dart';
 import 'package:projeto_pagina/data/models/estado_paginas_model.dart';
 import 'package:projeto_pagina/data/models/tipo_transacao_model.dart';
+import 'package:projeto_pagina/data/repositories/exemplar_repository.dart';
 import 'package:projeto_pagina/data/repositories/produto_repository.dart';
 import 'package:projeto_pagina/services/estado_capa_service.dart';
 import 'package:projeto_pagina/services/estado_paginas_service.dart';
 import 'package:projeto_pagina/services/tipo_transacao_service.dart';
 import 'package:projeto_pagina/stores/produto_store.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ConfiguracoesAcervoCadastrosAdd extends StatefulWidget {
   const ConfiguracoesAcervoCadastrosAdd({super.key});
@@ -47,6 +49,8 @@ class _ConfiguracoesAcervoCadastrosAddState
 
   final TextEditingController priceController = TextEditingController();
   final TextEditingController daysController = TextEditingController();
+
+  String livroId = '';
 
   Future<List<EstadoCapaModel>>? estadoCapaFuture;
   Future<List<EstadoPaginasModel>>? estadoPaginasFuture;
@@ -175,6 +179,7 @@ class _ConfiguracoesAcervoCadastrosAddState
                                   );
                                   final livro = produtoStore.state.value[0];
 
+                                  livroId = livro.id;
                                   isbnController.text = livro.isbn;
                                   titleController.text = livro.titulo;
                                   authorController.text = livro.autor;
@@ -557,6 +562,7 @@ class _ConfiguracoesAcervoCadastrosAddState
                     // ------------------------------
                     SizedBox(height: screenHeight * 0.05),
                     TextFormField(
+                      controller: descriptionController,
                       validator: _validateRequiredField,
                       decoration: InputDecoration(
                         labelText: 'Descrição do Estado',
@@ -681,7 +687,7 @@ class _ConfiguracoesAcervoCadastrosAddState
                               TextFormField(
                                 controller: priceController,
                                 enabled: isSaleSelected,
-                                //validator: _validateRequiredField,
+                                keyboardType: TextInputType.number,
                                 decoration: InputDecoration(
                                   labelText: 'Valor',
                                   hintText: 'R\$ 0,00',
@@ -743,33 +749,51 @@ class _ConfiguracoesAcervoCadastrosAddState
                               ),
                             ),
                             ElevatedButton(
-                              onPressed: () {
-                                // fazer uma validação quando a API estiver pronta
-                                bool success =
-                                    _formKey.currentState?.validate() ?? false;
+                              onPressed: () async {
+                                bool success = await _handleCreateExemplar() &&
+                                    _formKey.currentState!.validate();
 
-                                String message = success
-                                    ? "Livro cadastrado com sucesso!"
-                                    : "Algo deu errado, verifique os dados.";
+                                if (success && mounted) {
+                                  ScaffoldMessenger.of(context)
+                                      .hideCurrentSnackBar();
 
-                                ScaffoldMessenger.of(context)
-                                    .hideCurrentSnackBar();
-
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      message,
-                                      style: TextStyle(
-                                        fontFamily: 'Poppins',
-                                        fontSize: responsiveFontSize(16.0),
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        'Exemplar cadastrado com sucesso!',
+                                        style: TextStyle(
+                                          fontFamily: 'Poppins',
+                                          fontSize: responsiveFontSize(16.0),
+                                        ),
                                       ),
+                                      duration: const Duration(seconds: 5),
+                                      backgroundColor: const Color(0xff4ecd72),
                                     ),
-                                    duration: const Duration(seconds: 5),
-                                    backgroundColor: success
-                                        ? const Color(0xff4ecd72)
-                                        : const Color(0xffcd4e4e),
-                                  ),
-                                );
+                                  );
+                                  Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (BuildContext context) =>
+                                          super.widget,
+                                    ),
+                                  );
+                                } else if (mounted) {
+                                  ScaffoldMessenger.of(context)
+                                      .hideCurrentSnackBar();
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        'Algo deu errado, verifique os dados.',
+                                        style: TextStyle(
+                                          fontFamily: 'Poppins',
+                                          fontSize: responsiveFontSize(16.0),
+                                        ),
+                                      ),
+                                      duration: const Duration(seconds: 5),
+                                      backgroundColor: const Color(0xffcd4e4e),
+                                    ),
+                                  );
+                                }
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: const Color(0xff4e90cd),
@@ -1229,6 +1253,7 @@ class _ConfiguracoesAcervoCadastrosAddState
               isLoanSelected = false;
               isExchangeSelected = false;
               isSaleSelected = false;
+              selectedNegotiationTypes.clear();
             });
           },
           child: Container(
@@ -1265,6 +1290,33 @@ class _ConfiguracoesAcervoCadastrosAddState
   Future<bool> _handlePesquisarProdutos(String query) async {
     try {
       await produtoStore.pesquisarProdutos(query);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<bool> _handleCreateExemplar() async {
+    bool negociando = selectedNegotiationTypes.isNotEmpty;
+
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String userId = prefs.getString('userId') ?? '';
+
+    double? preco = double.tryParse(priceController.text);
+
+    int? prazo = int.tryParse(daysController.text);
+    try {
+      await ExemplarRepository().createExemplar(
+        descriptionController.text,
+        negociando,
+        livroId,
+        userId,
+        selectedPageStateId,
+        selectedCoverStateId,
+        selectedNegotiationTypes,
+        preco,
+        prazo,
+      );
       return true;
     } catch (e) {
       return false;
