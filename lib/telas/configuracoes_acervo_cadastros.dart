@@ -4,6 +4,8 @@ import 'package:projeto_pagina/data/repositories/exemplar_repository.dart';
 import 'package:projeto_pagina/services/exemplar_detalhes_service.dart';
 import 'package:projeto_pagina/stores/exemplar_store.dart';
 import 'package:projeto_pagina/telas/configuracoes_acervo_cadastros_add.dart';
+import 'package:projeto_pagina/telas/configuracoes_acervo_cadastros_atualizar.dart';
+import 'package:projeto_pagina/telas/configuracoes_acervo_cadastros_excluir.dart';
 import 'package:projeto_pagina/telas/produto_negociacao_negociacoes.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -348,8 +350,16 @@ class _ConfiguracoesAcervoCadastrosState
                                                           ),
                                                           onPressed: () {
                                                             if (!isLocked) {
-                                                              print(
-                                                                  'Botão de edição clicado');
+                                                              Navigator
+                                                                  .pushReplacement(
+                                                                context,
+                                                                MaterialPageRoute(
+                                                                  builder: (context) =>
+                                                                      ConfiguracoesAcervoCadastrosAtualizar(
+                                                                          exemplarId:
+                                                                              exemplar.id),
+                                                                ),
+                                                              );
                                                             }
                                                           },
                                                         ),
@@ -360,10 +370,16 @@ class _ConfiguracoesAcervoCadastrosState
                                                                 0xffcd4e4e),
                                                           ),
                                                           onPressed: () {
-                                                            if (!isLocked) {
-                                                              print(
-                                                                  'Botão de exclusão clicado');
-                                                            }
+                                                            Navigator
+                                                                .pushReplacement(
+                                                              context,
+                                                              MaterialPageRoute(
+                                                                builder: (context) =>
+                                                                    ConfiguracoesAcervoCadastrosExcluir(
+                                                                        exemplarId:
+                                                                            exemplar.id),
+                                                              ),
+                                                            );
                                                           },
                                                         ),
                                                       ],
