@@ -300,10 +300,11 @@ class _HomeState extends State<Home> {
                                                     child: Row(
                                                       children: [
                                                         // Trocar pelo nome das categorias quando a API estiver pronta
-                                                        _buildCategory(
-                                                            'Aventura'),
-                                                        _buildCategory(
-                                                            'Biografia'),
+                                                        for (var categoria
+                                                            in exemplarDetalhes
+                                                                .categorias)
+                                                          _buildCategory(
+                                                              categoria),
                                                       ],
                                                     ),
                                                   ),
