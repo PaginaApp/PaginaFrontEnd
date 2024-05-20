@@ -1302,6 +1302,7 @@ class _ConfiguracoesAcervoCadastrosAddState
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String userId = prefs.getString('userId') ?? '';
 
+    priceController.text = priceController.text.replaceAll(',', '.');
     double? preco = double.tryParse(priceController.text);
 
     int? prazo = int.tryParse(daysController.text);
