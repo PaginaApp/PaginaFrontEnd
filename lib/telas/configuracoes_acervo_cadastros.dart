@@ -1,6 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:projeto_pagina/data/models/exemplar_detalhes_model.dart';
+import 'package:projeto_pagina/data/repositories/exemplar_repository.dart';
+import 'package:projeto_pagina/services/exemplar_detalhes_service.dart';
+import 'package:projeto_pagina/stores/exemplar_store.dart';
 import 'package:projeto_pagina/telas/configuracoes_acervo_cadastros_add.dart';
+import 'package:projeto_pagina/telas/configuracoes_acervo_cadastros_atualizar.dart';
+import 'package:projeto_pagina/telas/configuracoes_acervo_cadastros_excluir.dart';
 import 'package:projeto_pagina/telas/produto_negociacao_negociacoes.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ConfiguracoesAcervoCadastros extends StatefulWidget {
   const ConfiguracoesAcervoCadastros({super.key});
@@ -12,6 +19,20 @@ class ConfiguracoesAcervoCadastros extends StatefulWidget {
 
 class _ConfiguracoesAcervoCadastrosState
     extends State<ConfiguracoesAcervoCadastros> {
+  final ExemplarStore exemplarStore =
+      ExemplarStore(exemplarRepository: ExemplarRepository());
+
+  @override
+  void initState() {
+    super.initState();
+    SharedPreferences.getInstance().then((prefs) {
+      String? id = prefs.getString('userId');
+      if (id != null) {
+        exemplarStore.getExemplaresByUser(id, 1, 10);
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
@@ -126,136 +147,266 @@ class _ConfiguracoesAcervoCadastrosState
               child: TabBarView(
                 children: [
                   // Conteúdo da aba de cadastros
-                  Container(
-                    color: const Color(0xfff6f5f2),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: ListView.builder(
-                            itemCount: 10,
-                            itemBuilder: (context, index) {
-                              bool isLocked = index % 2 ==
-                                  0; // Condição temporária para simular caixas bloqueadas
-                              return InkWell(
-                                onTap: () {
-                                  if (!isLocked) {
-                                    print('Caixa $index clicada');
-                                  }
-                                },
-                                child: Opacity(
-                                  opacity: isLocked ? 0.5 : 1,
-                                  child: Container(
-                                    margin: EdgeInsets.all(screenWidth * 0.05),
-                                    padding: EdgeInsets.all(screenWidth * 0.02),
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xfff6f5f2),
-                                      borderRadius: BorderRadius.circular(8.0),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.grey.withOpacity(0.5),
-                                          spreadRadius: 5,
-                                          blurRadius: 7,
-                                          offset: const Offset(0, 3),
-                                        ),
-                                      ],
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        Stack(
-                                          children: [
-                                            Image.asset(
-                                              'assets/png/emprestimo.png',
-                                              width: screenWidth * 0.3,
-                                              height: screenHeight * 0.1,
-                                            ),
-                                            if (isLocked)
-                                              Icon(
-                                                Icons.lock,
-                                                size: screenWidth * 0.1,
-                                                color: Colors.grey,
-                                              ),
-                                          ],
-                                        ),
-                                        SizedBox(width: screenWidth * 0.002),
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                'Nome do livro',
+
+                  // -------------------------------------------------
+
+                  AnimatedBuilder(
+                    animation: Listenable.merge([
+                      exemplarStore.isLoading,
+                      exemplarStore.error,
+                      exemplarStore.state,
+                    ]),
+                    builder: (context, child) {
+                      if (exemplarStore.isLoading.value) {
+                        return const Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      }
+
+                      if (exemplarStore.error.value.isNotEmpty) {
+                        return Center(
+                          child: Text(
+                            "Falha ao carregar exemplares, verifique sua conexão",
+                            style: TextStyle(
+                              color: const Color(0xffcd4e4e),
+                              fontSize: responsiveFontSize(14.0),
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'Poppins',
+                            ),
+                          ),
+                        );
+                      }
+
+                      if (exemplarStore.state.value.isEmpty) {
+                        return Center(
+                          child: Text(
+                            'Nenhum exemplar encontrado',
+                            style: TextStyle(
+                              color: const Color(0xff14131a),
+                              fontSize: responsiveFontSize(14.0),
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'Poppins',
+                            ),
+                          ),
+                        );
+                      } else {
+                        return Container(
+                          color: const Color(0xfff6f5f2),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: ListView.builder(
+                                  itemCount: exemplarStore.state.value.length,
+                                  itemBuilder: (context, index) {
+                                    final exemplar =
+                                        exemplarStore.state.value[index];
+                                    // Condição para exemplares em negociação
+                                    bool isLocked = exemplar.negociando;
+                                    return InkWell(
+                                      onTap: () {
+                                        if (!isLocked) {
+                                          print('Caixa $index clicada');
+                                        }
+                                      },
+                                      // -------------------------------------------------
+
+                                      child:
+                                          FutureBuilder<ExemplarDetalhesModel>(
+                                        future: ExemplarDetalhesService()
+                                            .fetchExemplarDetalhes(exemplar.id),
+                                        builder: (context, snapshot) {
+                                          if (snapshot.connectionState ==
+                                              ConnectionState.waiting) {
+                                            return const Center(
+                                              child:
+                                                  CircularProgressIndicator(),
+                                            );
+                                          } else if (snapshot.hasError) {
+                                            return Center(
+                                              child: Text(
+                                                'Erro ao carregar exemplar',
                                                 style: TextStyle(
-                                                  fontFamily: 'Poppins',
+                                                  color:
+                                                      const Color(0xffcd4e4e),
                                                   fontSize:
                                                       responsiveFontSize(14.0),
-                                                  color:
-                                                      const Color(0xff14131a),
                                                   fontWeight: FontWeight.bold,
+                                                  fontFamily: 'Poppins',
                                                 ),
                                               ),
-                                              SizedBox(
-                                                  height: screenHeight * 0.005),
-                                              SingleChildScrollView(
-                                                scrollDirection:
-                                                    Axis.horizontal,
+                                            );
+                                          } else {
+                                            final exemplarDetalhes =
+                                                snapshot.data!;
+                                            return Opacity(
+                                              opacity: isLocked ? 0.5 : 1,
+                                              child: Container(
+                                                margin: EdgeInsets.all(
+                                                    screenWidth * 0.05),
+                                                padding: EdgeInsets.all(
+                                                    screenWidth * 0.02),
+                                                decoration: BoxDecoration(
+                                                  color:
+                                                      const Color(0xfff6f5f2),
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          8.0),
+                                                  boxShadow: [
+                                                    BoxShadow(
+                                                      color: Colors.grey
+                                                          .withOpacity(0.5),
+                                                      spreadRadius: 5,
+                                                      blurRadius: 7,
+                                                      offset:
+                                                          const Offset(0, 3),
+                                                    ),
+                                                  ],
+                                                ),
                                                 child: Row(
                                                   children: [
-                                                    _buildCategory('Aventura'),
-                                                    _buildCategory('Biografia'),
+                                                    Stack(
+                                                      children: [
+                                                        Image.asset(
+                                                          'assets/png/emprestimo.png',
+                                                          width:
+                                                              screenWidth * 0.3,
+                                                          height: screenHeight *
+                                                              0.1,
+                                                        ),
+                                                        if (isLocked)
+                                                          Icon(
+                                                            Icons.lock,
+                                                            size: screenWidth *
+                                                                0.1,
+                                                            color: Colors.grey,
+                                                          ),
+                                                      ],
+                                                    ),
+                                                    SizedBox(
+                                                        width: screenWidth *
+                                                            0.002),
+                                                    Expanded(
+                                                      child: Column(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
+                                                        children: [
+                                                          Text(
+                                                            exemplarDetalhes
+                                                                .titulo,
+                                                            style: TextStyle(
+                                                              fontFamily:
+                                                                  'Poppins',
+                                                              fontSize:
+                                                                  responsiveFontSize(
+                                                                      14.0),
+                                                              color: const Color(
+                                                                  0xff14131a),
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
+                                                            ),
+                                                          ),
+                                                          SizedBox(
+                                                              height:
+                                                                  screenHeight *
+                                                                      0.005),
+                                                          SingleChildScrollView(
+                                                            scrollDirection:
+                                                                Axis.horizontal,
+                                                            child: Row(
+                                                              children: [
+                                                                for (var categoria
+                                                                    in exemplarDetalhes
+                                                                        .categorias)
+                                                                  _buildCategory(
+                                                                      categoria),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                          SizedBox(
+                                                              height:
+                                                                  screenHeight *
+                                                                      0.01),
+                                                          Image.asset(
+                                                            'assets/png/doacao.png',
+                                                            width: screenWidth *
+                                                                0.1,
+                                                            height:
+                                                                screenHeight *
+                                                                    0.05,
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                    Column(
+                                                      children: [
+                                                        IconButton(
+                                                          icon: const Icon(
+                                                            Icons.edit,
+                                                            color: Color(
+                                                                0xff4ecd72),
+                                                          ),
+                                                          onPressed: () {
+                                                            if (!isLocked) {
+                                                              Navigator
+                                                                  .pushReplacement(
+                                                                context,
+                                                                MaterialPageRoute(
+                                                                  builder: (context) =>
+                                                                      ConfiguracoesAcervoCadastrosAtualizar(
+                                                                          exemplarId:
+                                                                              exemplar.id),
+                                                                ),
+                                                              );
+                                                            }
+                                                          },
+                                                        ),
+                                                        IconButton(
+                                                          icon: const Icon(
+                                                            Icons.delete,
+                                                            color: Color(
+                                                                0xffcd4e4e),
+                                                          ),
+                                                          onPressed: () {
+                                                            Navigator
+                                                                .pushReplacement(
+                                                              context,
+                                                              MaterialPageRoute(
+                                                                builder: (context) =>
+                                                                    ConfiguracoesAcervoCadastrosExcluir(
+                                                                        exemplarId:
+                                                                            exemplar.id),
+                                                              ),
+                                                            );
+                                                          },
+                                                        ),
+                                                      ],
+                                                    ),
                                                   ],
                                                 ),
                                               ),
-                                              SizedBox(
-                                                  height: screenHeight * 0.01),
-                                              Image.asset(
-                                                'assets/png/doacao.png',
-                                                width: screenWidth * 0.1,
-                                                height: screenHeight * 0.05,
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        Column(
-                                          children: [
-                                            IconButton(
-                                              icon: const Icon(
-                                                Icons.edit,
-                                                color: Color(0xff4ecd72),
-                                              ),
-                                              onPressed: () {
-                                                if (!isLocked) {
-                                                  print(
-                                                      'Botão de edição clicado');
-                                                }
-                                              },
-                                            ),
-                                            IconButton(
-                                              icon: const Icon(
-                                                Icons.delete,
-                                                color: Color(0xffcd4e4e),
-                                              ),
-                                              onPressed: () {
-                                                if (!isLocked) {
-                                                  print(
-                                                      'Botão de exclusão clicado');
-                                                }
-                                              },
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  ),
+                                            );
+                                          }
+                                        },
+                                      ),
+
+                                      // -------------------------------------------------
+                                    );
+                                  },
                                 ),
-                              );
-                            },
+                              ),
+                              SizedBox(height: screenHeight * 0.1),
+                            ],
                           ),
-                        ),
-                        SizedBox(height: screenHeight * 0.1),
-                      ],
-                    ),
+                        );
+                      }
+                    },
                   ),
+                  // -------------------------------------------------
+                  // Fim do conteúdo da aba de cadastros
+
                   // Conteúdo da aba de negociações
                   Container(
                     color: const Color(0xfff6f5f2),
@@ -366,6 +517,7 @@ class _ConfiguracoesAcervoCadastrosState
                       ],
                     ),
                   ),
+                  // Fim do conteúdo da aba de negociações
                 ],
               ),
             ),
@@ -373,7 +525,7 @@ class _ConfiguracoesAcervoCadastrosState
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () {
-            Navigator.push(
+            Navigator.pushReplacement(
               context,
               MaterialPageRoute(
                   builder: (context) =>

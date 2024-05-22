@@ -25,4 +25,17 @@ class ExemplarStore {
 
     isLoading.value = false;
   }
+
+  Future getExemplaresByUser(String id, int page, int limit) async {
+    isLoading.value = true;
+    try {
+      final result =
+          await exemplarRepository.getExemplaresByUser(id, page, limit);
+      state.value = result;
+    } catch (e) {
+      error.value = e.toString();
+    }
+
+    isLoading.value = false;
+  }
 }

@@ -1,32 +1,43 @@
 import 'package:flutter/material.dart';
 import 'package:projeto_pagina/data/models/estado_capa_model.dart';
 import 'package:projeto_pagina/data/models/estado_paginas_model.dart';
+import 'package:projeto_pagina/data/models/exemplar_detalhes_model.dart';
 import 'package:projeto_pagina/data/models/tipo_transacao_model.dart';
 import 'package:projeto_pagina/data/repositories/exemplar_repository.dart';
-import 'package:projeto_pagina/data/repositories/produto_repository.dart';
 import 'package:projeto_pagina/services/estado_capa_service.dart';
 import 'package:projeto_pagina/services/estado_paginas_service.dart';
+import 'package:projeto_pagina/services/exemplar_detalhes_service.dart';
 import 'package:projeto_pagina/services/tipo_transacao_service.dart';
-import 'package:projeto_pagina/stores/produto_store.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class ConfiguracoesAcervoCadastrosAdd extends StatefulWidget {
-  const ConfiguracoesAcervoCadastrosAdd({super.key});
+class ConfiguracoesAcervoCadastrosAtualizar extends StatefulWidget {
+  final String exemplarId;
+
+  const ConfiguracoesAcervoCadastrosAtualizar({
+    Key? key,
+    required this.exemplarId,
+  }) : super(key: key);
 
   @override
-  State<ConfiguracoesAcervoCadastrosAdd> createState() =>
-      _ConfiguracoesAcervoCadastrosAddState();
+  State<ConfiguracoesAcervoCadastrosAtualizar> createState() =>
+      _ConfiguracoesAcervoCadastrosAtualizarState();
 }
 
-class _ConfiguracoesAcervoCadastrosAddState
-    extends State<ConfiguracoesAcervoCadastrosAdd> {
+class _ConfiguracoesAcervoCadastrosAtualizarState
+    extends State<ConfiguracoesAcervoCadastrosAtualizar> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   List<bool> isPageStateSelected = [false, false, false];
   String selectedPageStateId = '';
+  String pageStateId1 = '';
+  String pageStateId2 = '';
+  String pageStateId3 = '';
 
   List<bool> isCoverStateSelected = [false, false, false];
   String selectedCoverStateId = '';
+  String coverStateId1 = '';
+  String coverStateId2 = '';
+  String coverStateId3 = '';
 
   bool isDonationSelected = false;
   bool isLoanSelected = false;
@@ -35,8 +46,6 @@ class _ConfiguracoesAcervoCadastrosAddState
   bool isNoneSelected = false;
 
   List<String> selectedNegotiationTypes = [];
-
-  String dropdownValue = 'Selecione';
 
   // text controller para os campos de texto
   final TextEditingController isbnController = TextEditingController();
@@ -52,20 +61,77 @@ class _ConfiguracoesAcervoCadastrosAddState
 
   String livroId = '';
 
+  late Future<ExemplarDetalhesModel> exemplarDetalhesFuture;
   Future<List<EstadoCapaModel>>? estadoCapaFuture;
   Future<List<EstadoPaginasModel>>? estadoPaginasFuture;
   Future<List<TipoTransacaoModel>>? tipoTransacaoFuture;
 
-  final ProdutoStore produtoStore = ProdutoStore(
-    produtoRepository: ProdutoRepository(),
-  );
+  Future<void> fetchData() async {
+    var value = await ExemplarDetalhesService()
+        .fetchExemplarDetalhes(widget.exemplarId);
+
+    livroId = value.livID;
+    isbnController.text = value.isbn;
+    titleController.text = value.titulo;
+    authorController.text = value.autor;
+    publisherController.text = value.editora;
+    yearController.text = value.ano;
+    synopsisController.text = value.sinopse;
+    descriptionController.text = value.descricao;
+    selectedCoverStateId = value.ecpId;
+    selectedPageStateId = value.epgId;
+  }
+
+  void getCoverStateId() {
+    estadoCapaFuture = EstadoCapaService().fetchEstadoCapa();
+    estadoCapaFuture?.then((value) {
+      coverStateId1 = value[2].id;
+      coverStateId2 = value[0].id;
+      coverStateId3 = value[1].id;
+
+      for (int i = 0; i < isCoverStateSelected.length; i++) {
+        if (selectedCoverStateId == coverStateId1) {
+          isCoverStateSelected[0] = true;
+          break;
+        } else if (selectedCoverStateId == coverStateId2) {
+          isCoverStateSelected[1] = true;
+          break;
+        } else if (selectedCoverStateId == coverStateId3) {
+          isCoverStateSelected[2] = true;
+          break;
+        } else {}
+      }
+    });
+  }
+
+  void getPageStateId() {
+    estadoPaginasFuture = EstadoPaginasService().fetchEstadoPaginas();
+    estadoPaginasFuture?.then((value) {
+      pageStateId1 = value[1].id;
+      pageStateId2 = value[2].id;
+      pageStateId3 = value[0].id;
+
+      for (int i = 0; i < isPageStateSelected.length; i++) {
+        if (selectedPageStateId == pageStateId1) {
+          isPageStateSelected[0] = true;
+          break;
+        } else if (selectedPageStateId == pageStateId2) {
+          isPageStateSelected[1] = true;
+          break;
+        } else if (selectedPageStateId == pageStateId3) {
+          isPageStateSelected[2] = true;
+          break;
+        }
+      }
+    });
+  }
 
   @override
   void initState() {
     super.initState();
-    produtoStore.getProdutos(1, 50);
-    estadoCapaFuture = EstadoCapaService().fetchEstadoCapa();
-    estadoPaginasFuture = EstadoPaginasService().fetchEstadoPaginas();
+    getPageStateId();
+    getCoverStateId();
+    fetchData();
     tipoTransacaoFuture = TipoTransacaoService().fetchTipoTransacao();
   }
 
@@ -96,7 +162,7 @@ class _ConfiguracoesAcervoCadastrosAddState
                 backgroundColor: const Color(0xfff6f5f2),
                 iconTheme: const IconThemeData(color: Color(0xff4e90cd)),
                 title: Text(
-                  'Novo Livro',
+                  'Editar Exemplar',
                   style: TextStyle(
                     fontFamily: 'Poppins',
                     fontSize: responsiveFontSize(20),
@@ -104,152 +170,6 @@ class _ConfiguracoesAcervoCadastrosAddState
                     color: const Color(0xff14131a),
                   ),
                 ),
-              ),
-
-              // -----------------------------------------------------
-
-              AnimatedBuilder(
-                animation: Listenable.merge([
-                  produtoStore.isLoading,
-                  produtoStore.error,
-                  produtoStore.state,
-                ]),
-                builder: (context, child) {
-                  if (produtoStore.isLoading.value) {
-                    return const Center(
-                      child: CircularProgressIndicator(),
-                    );
-                  }
-
-                  if (produtoStore.error.value.isNotEmpty) {
-                    return Center(
-                      child: Text(
-                        "Falha ao carregar barra de pesquisa, verifique sua conexão",
-                        style: TextStyle(
-                          color: const Color(0xffcd4e4e),
-                          fontSize: responsiveFontSize(14.0),
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'Poppins',
-                        ),
-                      ),
-                    );
-                  }
-
-                  if (produtoStore.state.value.isEmpty) {
-                    return Center(
-                      child: Text(
-                        'Nenhum livro encontrado',
-                        style: TextStyle(
-                          color: const Color(0xff14131a),
-                          fontSize: responsiveFontSize(14.0),
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'Poppins',
-                        ),
-                      ),
-                    );
-                  } else {
-                    return Row(
-                      children: [
-                        Expanded(
-                          child: Padding(
-                            padding: EdgeInsets.all(screenWidth * 0.07),
-                            child: TextField(
-                              onSubmitted: (query) async {
-                                bool success =
-                                    await _handlePesquisarProdutos(query);
-
-                                //bool success = true;
-
-                                if (success && mounted) {
-                                  ScaffoldMessenger.of(context)
-                                      .hideCurrentSnackBar();
-
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                        'Livro encontrado com sucesso!',
-                                        style: TextStyle(
-                                          fontFamily: 'Poppins',
-                                          fontSize: responsiveFontSize(16.0),
-                                        ),
-                                      ),
-                                      duration: const Duration(seconds: 5),
-                                      backgroundColor: const Color(0xff4ecd72),
-                                    ),
-                                  );
-                                  final livro = produtoStore.state.value[0];
-
-                                  livroId = livro.id;
-                                  isbnController.text = livro.isbn;
-                                  titleController.text = livro.titulo;
-                                  authorController.text = livro.autor;
-                                  publisherController.text = livro.editora;
-                                  yearController.text = livro.ano;
-                                  synopsisController.text = livro.sinopse;
-                                } else if (mounted) {
-                                  ScaffoldMessenger.of(context)
-                                      .hideCurrentSnackBar();
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                        'Livro não encontrado!',
-                                        style: TextStyle(
-                                          fontFamily: 'Poppins',
-                                          fontSize: responsiveFontSize(16.0),
-                                        ),
-                                      ),
-                                      duration: const Duration(seconds: 5),
-                                      backgroundColor: const Color(0xffec4e4e),
-                                    ),
-                                  );
-                                  Navigator.pushReplacement(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (BuildContext context) =>
-                                          super.widget,
-                                    ),
-                                  );
-                                  isbnController.clear();
-                                  titleController.clear();
-                                  authorController.clear();
-                                  publisherController.clear();
-                                  yearController.clear();
-                                  synopsisController.clear();
-                                }
-                              },
-                              decoration: InputDecoration(
-                                hintText:
-                                    'Pesquise um livro por ISBN ou título',
-                                hintStyle: TextStyle(
-                                  color: const Color(0xff14131a),
-                                  fontFamily: 'Poppins',
-                                  fontSize: responsiveFontSize(14.0),
-                                ),
-                                fillColor: const Color(0xfff6f5f2),
-                                filled: true,
-                                prefixIcon: const Icon(Icons.search),
-                                enabledBorder: const OutlineInputBorder(
-                                  borderSide:
-                                      BorderSide(color: Color(0xff4e90cd)),
-                                  borderRadius: BorderRadius.all(
-                                    Radius.circular(8.0),
-                                  ),
-                                ),
-                                focusedBorder: const OutlineInputBorder(
-                                  borderSide:
-                                      BorderSide(color: Color(0xff4e90cd)),
-                                  borderRadius: BorderRadius.all(
-                                    Radius.circular(8.0),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    );
-                  }
-                },
               ),
 
               // -----------------------------------------------------
@@ -471,43 +391,16 @@ class _ConfiguracoesAcervoCadastrosAddState
                     // ------------------------------
                     // ESTADOS DE CONSERVAÇÃO DA CAPA
 
-                    FutureBuilder<List<EstadoCapaModel>>(
-                      future: estadoCapaFuture,
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return const Center(
-                            child: CircularProgressIndicator(),
-                          );
-                        } else if (snapshot.hasError) {
-                          return Center(
-                            child: Text(
-                              'Erro ao carregar estados de conservação da capa',
-                              style: TextStyle(
-                                color: const Color(0xffcd4e4e),
-                                fontSize: responsiveFontSize(14.0),
-                                fontWeight: FontWeight.bold,
-                                fontFamily: 'Poppins',
-                              ),
-                            ),
-                          );
-                        } else {
-                          final estadoCapa = snapshot.data!;
-                          return Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            // exemplo de estado de conservação
-                            children: [
-                              _buildCoverState(
-                                  estadoCapa[2].nome, 0, estadoCapa[2].id),
-                              _buildCoverState(
-                                  estadoCapa[0].nome, 1, estadoCapa[0].id),
-                              _buildCoverState(
-                                  estadoCapa[1].nome, 2, estadoCapa[1].id),
-                            ],
-                          );
-                        }
-                      },
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      // exemplo de estado de conservação
+                      children: [
+                        _buildCoverState("Ótimo estado", 0, coverStateId1),
+                        _buildCoverState("Estado regular", 1, coverStateId2),
+                        _buildCoverState("Péssimo estado", 2, coverStateId3),
+                      ],
                     ),
+
                     // ------------------------------
 
                     SizedBox(height: screenHeight * 0.03),
@@ -520,44 +413,16 @@ class _ConfiguracoesAcervoCadastrosAddState
                       ),
                     ),
                     SizedBox(height: screenHeight * 0.01),
-                    // ------------------------------
                     // ESTADOS DE CONSERVAÇÃO DAS PÁGINAS
-                    FutureBuilder<List<EstadoPaginasModel>>(
-                      future: estadoPaginasFuture,
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return const Center(
-                            child: CircularProgressIndicator(),
-                          );
-                        } else if (snapshot.hasError) {
-                          return Center(
-                            child: Text(
-                              'Erro ao carregar estados de conservação da página',
-                              style: TextStyle(
-                                color: const Color(0xffcd4e4e),
-                                fontSize: responsiveFontSize(14.0),
-                                fontWeight: FontWeight.bold,
-                                fontFamily: 'Poppins',
-                              ),
-                            ),
-                          );
-                        } else {
-                          final estadoPaginas = snapshot.data!;
-                          return Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              _buildPagesState(estadoPaginas[1].nome, 0,
-                                  estadoPaginas[1].id),
-                              _buildPagesState(estadoPaginas[2].nome, 1,
-                                  estadoPaginas[2].id),
-                              _buildPagesState(estadoPaginas[0].nome, 2,
-                                  estadoPaginas[0].id),
-                            ],
-                          );
-                        }
-                      },
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        _buildPagesState("Ótimo estado", 0, pageStateId1),
+                        _buildPagesState("Estado regular", 1, pageStateId2),
+                        _buildPagesState("Péssimo estado", 2, pageStateId3),
+                      ],
                     ),
+                    // ------------------------------
 
                     // ------------------------------
                     SizedBox(height: screenHeight * 0.05),
@@ -750,8 +615,24 @@ class _ConfiguracoesAcervoCadastrosAddState
                             ),
                             ElevatedButton(
                               onPressed: () async {
-                                bool success = await _handleCreateExemplar() &&
-                                    _formKey.currentState!.validate();
+                                if (selectedCoverStateId.isEmpty ||
+                                    selectedPageStateId.isEmpty) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        'Selecione o estado de conservação da capa e das páginas',
+                                        style: TextStyle(
+                                          fontFamily: 'Poppins',
+                                          fontSize: responsiveFontSize(16.0),
+                                        ),
+                                      ),
+                                      duration: const Duration(seconds: 5),
+                                      backgroundColor: const Color(0xffcd4e4e),
+                                    ),
+                                  );
+                                  return;
+                                }
+                                bool success = await _handleUpdateExemplar();
 
                                 if (success && mounted) {
                                   ScaffoldMessenger.of(context)
@@ -760,7 +641,7 @@ class _ConfiguracoesAcervoCadastrosAddState
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
                                       content: Text(
-                                        'Exemplar cadastrado com sucesso!',
+                                        'Exemplar atualizado com sucesso!',
                                         style: TextStyle(
                                           fontFamily: 'Poppins',
                                           fontSize: responsiveFontSize(16.0),
@@ -812,15 +693,6 @@ class _ConfiguracoesAcervoCadastrosAddState
                             ),
                           ],
                         ),
-                        // ElevatedButton(
-                        //   onPressed: () {
-                        //     // if (_formKey.currentState?.validate() ?? false) {
-                        //     //   Navigator.push(
-                        //     //     context,
-                        //     //     MaterialPageRoute(
-                        //     //         builder: (context) => const Tela()),
-                        //     //   );
-                        //     // }
                       ],
                     ),
                   ],
@@ -1286,17 +1158,7 @@ class _ConfiguracoesAcervoCadastrosAddState
     );
   }
 
-  // método para lidar com a pesquisa de livros
-  Future<bool> _handlePesquisarProdutos(String query) async {
-    try {
-      await produtoStore.pesquisarProdutos(query);
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-
-  Future<bool> _handleCreateExemplar() async {
+  Future<bool> _handleUpdateExemplar() async {
     bool negociando = selectedNegotiationTypes.isNotEmpty;
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -1306,8 +1168,10 @@ class _ConfiguracoesAcervoCadastrosAddState
     double? preco = double.tryParse(priceController.text);
 
     int? prazo = int.tryParse(daysController.text);
+
     try {
-      await ExemplarRepository().createExemplar(
+      await ExemplarRepository().updateExemplar(
+        widget.exemplarId,
         descriptionController.text,
         negociando,
         livroId,
