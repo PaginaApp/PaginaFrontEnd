@@ -6,6 +6,7 @@ import 'package:projeto_pagina/stores/exemplar_store.dart';
 import 'package:projeto_pagina/telas/configuracoes_acervo_cadastros_add.dart';
 import 'package:projeto_pagina/telas/configuracoes_acervo_cadastros_atualizar.dart';
 import 'package:projeto_pagina/telas/configuracoes_acervo_cadastros_excluir.dart';
+import 'package:projeto_pagina/telas/produto_1.dart';
 import 'package:projeto_pagina/telas/produto_negociacao_negociacoes.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -206,7 +207,13 @@ class _ConfiguracoesAcervoCadastrosState
                                     return InkWell(
                                       onTap: () {
                                         if (!isLocked) {
-                                          print('Caixa $index clicada');
+                                          Navigator.pushReplacement(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) => Produto1(
+                                                  exemplarId: exemplar.id),
+                                            ),
+                                          );
                                         }
                                       },
                                       // -------------------------------------------------
