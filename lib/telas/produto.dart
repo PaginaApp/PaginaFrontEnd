@@ -192,23 +192,49 @@ class _ProdutoState extends State<Produto> {
                         ),
                       ),
                       SizedBox(height: screenHeight * 0.02),
-                      Padding(
-                        padding: EdgeInsets.symmetric(
-                            horizontal: screenWidth * 0.05),
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            child: Row(
-                              children: [
-                                // Trocar pelo nome das categorias quando a API estiver pronta
-                                _buildCategory('Aventura'),
-                                _buildCategory('Biografia'),
-                              ],
-                            ),
-                          ),
-                        ),
+                      //----------------------------------------
+                      FutureBuilder<ExemplarDetalhesModel>(
+                        future: _exemplarDetalhesFuture,
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          } else if (snapshot.hasError) {
+                            return Center(
+                              child: Text(
+                                'Erro ao carregar categorias',
+                                style: TextStyle(
+                                  fontFamily: 'Poppins',
+                                  fontSize: responsiveFontSize(16),
+                                  color: const Color(0xff14131a),
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            );
+                          } else {
+                            final exemplar = snapshot.data!;
+                            return Padding(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: screenWidth * 0.05),
+                              child: Align(
+                                alignment: Alignment.centerLeft,
+                                child: SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal,
+                                  child: Row(
+                                    children: [
+                                      for (var categoria in exemplar.categorias)
+                                        _buildCategory(categoria),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            );
+                          }
+                        },
                       ),
+                      //----------------------------------------
                       SizedBox(height: screenHeight * 0.01),
                       Container(
                         color: const Color(0xfff6f5f2),
