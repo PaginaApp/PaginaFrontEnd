@@ -2,6 +2,8 @@ class ExemplarDetalhesModel {
   final String id;
   final String descricao;
   final bool negociando;
+  final double? preco;
+  final int? prazo;
   final String usuID;
   final String titulo;
   final String ano;
@@ -20,6 +22,8 @@ class ExemplarDetalhesModel {
     required this.id,
     required this.descricao,
     required this.negociando,
+    required this.preco,
+    required this.prazo,
     required this.usuID,
     required this.titulo,
     required this.ano,
@@ -40,6 +44,12 @@ class ExemplarDetalhesModel {
       id: json['exe_Id'],
       descricao: json['exe_Descricao'],
       negociando: json['exe_Negociando'],
+      preco: json['exe_Preco'] != null && json['exe_Preco'] is num
+          ? json['exe_Preco'].toDouble()
+          : null,
+      prazo: json['exe_Prazo'] != null && json['exe_Prazo'] is num
+          ? json['exe_Prazo'].toInt()
+          : null,
       usuID: json['exe_usu_id'],
       titulo: json['livro']['liv_Titulo'],
       ano: json['livro']['liv_Ano'],
