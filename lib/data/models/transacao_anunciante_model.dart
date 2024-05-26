@@ -6,9 +6,9 @@ class TransacaoAnuncianteModel {
   final String usuAnuncianteId;
   final String tipoTransacao;
   final String statusTransacao;
-  final List<String> exemplaresId;
-  final List<bool> exemplarNegociando;
-  final List<String> exemplaresUsuarioId;
+  final String exemplaresId;
+  final bool exemplarNegociando;
+  final String exemplaresUsuarioId;
 
   TransacaoAnuncianteModel({
     required this.id,
@@ -36,13 +36,9 @@ class TransacaoAnuncianteModel {
       usuAnuncianteId: json['trs_usu_Anunciante_id'],
       tipoTransacao: json['tipoTransacao']['ttr_Nome'],
       statusTransacao: json['statusTransacao']['str_Nome'],
-      exemplaresId: [for (var item in json['exemplares']) item['exe_Id']],
-      exemplarNegociando: [
-        for (var item in json['exemplares']) item['exe_Negociando']
-      ],
-      exemplaresUsuarioId: [
-        for (var item in json['exemplares']) item['exe_usu_id']
-      ],
+      exemplaresId: json['exemplares']['exe_Id'],
+      exemplarNegociando: json['exemplares']['exe_Negociando'],
+      exemplaresUsuarioId: json['exemplares']['exe_usu_id'],
     );
   }
 }
