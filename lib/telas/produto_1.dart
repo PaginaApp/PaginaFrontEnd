@@ -222,7 +222,9 @@ class _Produto1State extends State<Produto1> {
                           physics: const NeverScrollableScrollPhysics(),
                           padding: EdgeInsets.all(screenWidth * 0.05),
                           children: [
-                            _buildBox('Autor: ${exemplar.autor}', Icons.person),
+                            _buildBox(
+                                'Autor: ${exemplar.autor} - ${exemplar.ano}',
+                                Icons.person),
                             _buildBox(
                                 'Editora: ${exemplar.editora}', Icons.book),
                           ],
@@ -336,7 +338,7 @@ class _Produto1State extends State<Produto1> {
                         child: Align(
                           alignment: Alignment.centerLeft,
                           child: Text(
-                            'Selecione uma forma de negociação',
+                            'Forma de negociação',
                             style: TextStyle(
                               fontFamily: 'Poppins',
                               fontSize: responsiveFontSize(16),
@@ -510,7 +512,7 @@ class _Produto1State extends State<Produto1> {
             color: Colors.grey.withOpacity(0.5),
             spreadRadius: 5,
             blurRadius: 7,
-            offset: const Offset(0, 3), // changes position of shadow
+            offset: const Offset(0, 3),
           ),
         ],
       ),
