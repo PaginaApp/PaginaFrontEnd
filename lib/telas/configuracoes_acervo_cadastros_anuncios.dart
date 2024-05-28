@@ -8,6 +8,7 @@ import 'package:projeto_pagina/stores/transacao_anunciante_store.dart';
 import 'package:projeto_pagina/telas/produto_2.dart';
 import 'package:projeto_pagina/telas/produto_negociacao_negociacoes.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:diacritic/diacritic.dart';
 
 class ConfiguracoesAcervoCadastrosAnuncios extends StatefulWidget {
   const ConfiguracoesAcervoCadastrosAnuncios({super.key});
@@ -150,6 +151,11 @@ class _ConfiguracoesAcervoCadastrosAnunciosState
                                       MaterialPageRoute(
                                         builder: (context) => Produto2(
                                           exemplarId: exemplarDetalhes.id,
+                                          tipoTransacao:
+                                              transacao.tipoTransacao,
+                                          statusTransacao:
+                                              transacao.statusTransacao,
+                                          transacaoId: transacao.id,
                                         ),
                                       ),
                                     );
@@ -160,6 +166,8 @@ class _ConfiguracoesAcervoCadastrosAnunciosState
                                         builder: (context) =>
                                             ProdutoNegociacaoNegociacoes(
                                           exemplarId: exemplarDetalhes.id,
+                                          tipoTransacao:
+                                              transacao.tipoTransacao,
                                         ),
                                       ),
                                     );
@@ -206,16 +214,6 @@ class _ConfiguracoesAcervoCadastrosAnunciosState
                                                 CrossAxisAlignment.start,
                                             children: [
                                               Text(
-                                                "Você anunciou:",
-                                                style: TextStyle(
-                                                  fontFamily: 'Poppins',
-                                                  fontSize:
-                                                      responsiveFontSize(14.0),
-                                                  color:
-                                                      const Color(0xff14131a),
-                                                ),
-                                              ),
-                                              Text(
                                                 exemplarDetalhes.titulo,
                                                 style: TextStyle(
                                                   fontFamily: 'Poppins',
@@ -242,8 +240,36 @@ class _ConfiguracoesAcervoCadastrosAnunciosState
                                               ),
                                               SizedBox(
                                                   height: screenHeight * 0.01),
+                                              Text(
+                                                "Status da negociação: ${transacao.statusTransacao}",
+                                                style: TextStyle(
+                                                  fontFamily: 'Poppins',
+                                                  fontSize:
+                                                      responsiveFontSize(13.0),
+                                                  color:
+                                                      const Color(0xff14131a),
+                                                ),
+                                              ),
+                                              SizedBox(
+                                                  height: screenHeight * 0.01),
+                                              Text(
+                                                transacao.statusTransacao ==
+                                                        'Em espera'
+                                                    ? 'Aceite a negociação'
+                                                    : '',
+                                                style: TextStyle(
+                                                  color:
+                                                      const Color(0xff14131a),
+                                                  fontSize:
+                                                      responsiveFontSize(12.0),
+                                                  fontFamily: 'Poppins',
+                                                ),
+                                              ),
+                                              SizedBox(
+                                                  height: screenHeight * 0.01),
                                               Image.asset(
-                                                'assets/png/doacao.png',
+                                                'assets/png/${removeDiacritics(transacao.tipoTransacao).toLowerCase()}.png',
+                                                //'assets/png/emprestimo.png',
                                                 width: screenWidth * 0.1,
                                                 height: screenHeight * 0.05,
                                               ),
