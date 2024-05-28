@@ -132,7 +132,15 @@ class _Produto2State extends State<Produto2> {
                                             return const CircularProgressIndicator();
                                           } else if (snapshot.hasError) {
                                             return Text(
-                                                'Erro: ${snapshot.error}');
+                                              'Erro ao carregar imagem',
+                                              style: TextStyle(
+                                                fontFamily: 'Poppins',
+                                                fontSize:
+                                                    responsiveFontSize(16),
+                                                color: const Color(0xff14131a),
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            );
                                           } else {
                                             return snapshot.data!;
                                           }
