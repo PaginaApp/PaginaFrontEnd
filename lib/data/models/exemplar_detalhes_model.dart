@@ -2,7 +2,7 @@ class ExemplarDetalhesModel {
   final String id;
   final String descricao;
   final bool negociando;
-  final double? preco;
+  final String? preco;
   final int? prazo;
   final String usuID;
   final String titulo;
@@ -44,8 +44,8 @@ class ExemplarDetalhesModel {
       id: json['exe_Id'],
       descricao: json['exe_Descricao'],
       negociando: json['exe_Negociando'],
-      preco: json['exe_Preco'] != null && json['exe_Preco'] is num
-          ? json['exe_Preco'].toDouble()
+      preco: json['exe_Preco'] != null && json['exe_Preco'] is String
+          ? json['exe_Preco']
           : null,
       prazo: json['exe_Prazo'] != null && json['exe_Prazo'] is num
           ? json['exe_Prazo'].toInt()
