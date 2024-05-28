@@ -5,7 +5,7 @@ import 'package:projeto_pagina/data/repositories/transacao_leitor_repository.dar
 import 'package:projeto_pagina/services/exemplar_detalhes_service.dart';
 import 'package:projeto_pagina/stores/exemplar_store.dart';
 import 'package:projeto_pagina/stores/transacao_leitor_store.dart';
-import 'package:projeto_pagina/telas/produto_2.dart';
+import 'package:projeto_pagina/telas/produto_3.dart';
 import 'package:projeto_pagina/telas/produto_negociacao_negociacoes.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -146,8 +146,13 @@ class _ConfiguracoesAcervoCadastrosSolicitacoesState
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) => Produto2(
+                                        builder: (context) => Produto3(
                                           exemplarId: exemplarDetalhes.id,
+                                          tipoTransacao:
+                                              transacao.tipoTransacao,
+                                          statusTransacao:
+                                              transacao.statusTransacao,
+                                          transacaoId: transacao.id,
                                         ),
                                       ),
                                     );
@@ -158,6 +163,8 @@ class _ConfiguracoesAcervoCadastrosSolicitacoesState
                                         builder: (context) =>
                                             ProdutoNegociacaoNegociacoes(
                                           exemplarId: exemplarDetalhes.id,
+                                          tipoTransacao:
+                                              transacao.tipoTransacao,
                                         ),
                                       ),
                                     );
