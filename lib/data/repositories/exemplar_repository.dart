@@ -11,26 +11,24 @@ abstract class IExemplarRepository {
 
   Future<void> createExemplar(
     String descricao,
-    bool negociando,
     String livroId,
     String userId,
     String estadoPaginaId,
     String estadoCapaId,
     List<String> tiposTransacaoId,
-    double? preco,
+    String? preco,
     int? prazo,
   );
 
   Future<void> updateExemplar(
     String id,
     String descricao,
-    bool negociando,
     String livroId,
     String userId,
     String estadoPaginaId,
     String estadoCapaId,
     List<String> tiposTransacaoId,
-    double? preco,
+    String? preco,
     int? prazo,
   );
 
@@ -94,20 +92,19 @@ class ExemplarRepository implements IExemplarRepository {
   @override
   Future<void> createExemplar(
     String descricao,
-    bool negociando,
     String livroId,
     String userId,
     String estadoPaginaId,
     String estadoCapaId,
     List<String> tiposTransacaoId,
-    double? preco,
+    String? preco,
     int? prazo,
   ) async {
     final url = Uri.parse('${dotenv.env['BASE_API_URL']}exemplar/');
 
     Map<String, dynamic> body = {
       'exe_Descricao': descricao,
-      'exe_Negociando': negociando,
+      'exe_Negociando': false,
       'exe_liv_id': livroId,
       'exe_usu_id': userId,
       'exe_epg_id': estadoPaginaId,
@@ -138,20 +135,19 @@ class ExemplarRepository implements IExemplarRepository {
   Future<void> updateExemplar(
     String id,
     String descricao,
-    bool negociando,
     String livroId,
     String userId,
     String estadoPaginaId,
     String estadoCapaId,
     List<String> tiposTransacaoId,
-    double? preco,
+    String? preco,
     int? prazo,
   ) async {
     final url = Uri.parse('${dotenv.env['BASE_API_URL']}exemplar/$id');
 
     Map<String, dynamic> body = {
       'exe_Descricao': descricao,
-      'exe_Negociando': negociando,
+      'exe_Negociando': false,
       'exe_liv_id': livroId,
       'exe_usu_id': userId,
       'exe_epg_id': estadoPaginaId,
