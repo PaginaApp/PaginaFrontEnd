@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 //import 'package:dots_indicator/dots_indicator.dart';
 import 'package:projeto_pagina/data/models/exemplar_detalhes_model.dart';
+import 'package:projeto_pagina/data/models/tipo_transacao_model.dart';
 import 'package:projeto_pagina/services/exemplar_detalhes_service.dart';
+import 'package:projeto_pagina/services/transacao_service.dart';
 import 'package:projeto_pagina/telas/configuracoes_lista_de_desejos.dart';
+import 'package:projeto_pagina/telas/confirmar_negociacao.dart';
 
 class Produto extends StatefulWidget {
   final String exemplarId;
@@ -16,6 +19,10 @@ class Produto extends StatefulWidget {
 class _ProdutoState extends State<Produto> {
   final ExemplarDetalhesService _exemplarService = ExemplarDetalhesService();
   late Future<ExemplarDetalhesModel> _exemplarDetalhesFuture;
+  Future<List<TipoTransacaoModel>> tipoTransacaoFuture =
+      TransacaoService().getTiposTransacao();
+
+  String selectedNegotiationTypeId = '';
 
   final _controller = PageController();
   //late final PageController _controller;
@@ -368,156 +375,106 @@ class _ProdutoState extends State<Produto> {
                         ),
                       ),
                       SizedBox(height: screenHeight * 0.02),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          _buildCircle('Empréstimo', 0),
-                          _buildCircle('Troca', 1),
-                          _buildCircle('Venda', 2),
-                        ],
+                      // tipos de negociação
+                      FutureBuilder<List<TipoTransacaoModel>>(
+                        future: tipoTransacaoFuture,
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          } else if (snapshot.hasError) {
+                            return Center(
+                              child: Text(
+                                'Erro ao carregar tipos de negociação',
+                                style: TextStyle(
+                                  color: const Color(0xffcd4e4e),
+                                  fontSize: responsiveFontSize(14.0),
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: 'Poppins',
+                                ),
+                              ),
+                            );
+                          } else {
+                            final tipoTransacao = snapshot.data!;
+                            return Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                _buildCircle(
+                                    'Empréstimo',
+                                    0,
+                                    exemplar.prazo == null
+                                        ? 'Indefinido'
+                                        : "${exemplar.prazo} dias",
+                                    tipoTransacao[0].id),
+                                _buildCircle(
+                                    'Troca', 1, '', tipoTransacao[3].id),
+                                _buildCircle(
+                                    'Venda',
+                                    2,
+                                    exemplar.preco == null
+                                        ? '0'
+                                        : exemplar.preco.toString(),
+                                    tipoTransacao[1].id),
+                              ],
+                            );
+                          }
+                        },
                       ),
+
+                      // fim dos tipos de negociação
                       SizedBox(height: screenHeight * 0.02),
                       ElevatedButton(
                         onPressed: () {
-                          //lógica de negociação
-                          showModalBottomSheet(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return Container(
-                                padding: EdgeInsets.all(screenWidth * 0.02),
-                                color: const Color(0xffbabdd3),
-                                // ignore: sized_box_for_whitespace
-                                child: Container(
-                                  height: screenHeight * 0.2,
-                                  width: screenWidth * 2,
-                                  child: Row(
-                                    children: [
-                                      CircleAvatar(
-                                        radius: screenWidth * 0.05,
-                                        child: const Icon(Icons.person),
-                                      ),
-                                      SizedBox(width: screenWidth * 0.02),
-                                      Flexible(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              'Nome do anunciante',
-                                              style: TextStyle(
-                                                fontSize:
-                                                    responsiveFontSize(14.0),
-                                                fontFamily: 'Poppins',
-                                                fontWeight: FontWeight.bold,
-                                                color: const Color(0xff14131a),
-                                              ),
-                                            ),
-                                            SizedBox(
-                                                height: screenHeight * 0.01),
-                                            Row(
-                                              children: [
-                                                Flexible(
-                                                  child: Text(
-                                                    '@Doador intermediário = ',
-                                                    style: TextStyle(
-                                                      fontSize:
-                                                          responsiveFontSize(
-                                                              12.0),
-                                                      fontFamily: 'Poppins',
-                                                      color: const Color(
-                                                          0xff14131a),
-                                                    ),
-                                                  ),
-                                                ),
-                                                Row(
-                                                  children: [
-                                                    Icon(
-                                                      Icons.star,
-                                                      color: const Color(
-                                                          0xfff3e140),
-                                                      size: responsiveFontSize(
-                                                          20.0),
-                                                    ),
-                                                    Text(
-                                                      'x/5',
-                                                      style: TextStyle(
-                                                        fontSize:
-                                                            responsiveFontSize(
-                                                                12.0),
-                                                        fontFamily: 'Poppins',
-                                                        color: const Color(
-                                                            0xff14131a),
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ],
-                                            ),
-                                            SizedBox(
-                                                height: screenHeight * 0.01),
-                                            Row(
-                                              children: [
-                                                Icon(
-                                                  Icons.phone,
-                                                  color:
-                                                      const Color(0xfff6f5f2),
-                                                  size:
-                                                      responsiveFontSize(20.0),
-                                                ),
-                                                SizedBox(
-                                                    width: screenWidth * 0.01),
-                                                Flexible(
-                                                  child: Text(
-                                                    '(11) 91234-5678',
-                                                    style: TextStyle(
-                                                      fontSize:
-                                                          responsiveFontSize(
-                                                              12.0),
-                                                      fontFamily: 'Poppins',
-                                                      color: const Color(
-                                                          0xff14131a),
-                                                    ),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                            SizedBox(
-                                                height: screenHeight * 0.005),
-                                            Row(
-                                              children: [
-                                                Icon(
-                                                  Icons.email,
-                                                  color:
-                                                      const Color(0xfff6f5f2),
-                                                  size:
-                                                      responsiveFontSize(20.0),
-                                                ),
-                                                SizedBox(
-                                                    width: screenWidth * 0.01),
-                                                Flexible(
-                                                  child: Text(
-                                                    'usuario.exemplo@email.com',
-                                                    style: TextStyle(
-                                                      fontSize:
-                                                          responsiveFontSize(
-                                                              12.0),
-                                                      fontFamily: 'Poppins',
-                                                      color: const Color(
-                                                          0xff14131a),
-                                                    ),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ],
+                          if (selectedNegotiationTypeId != '') {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ConfirmarNegociacao(
+                                  exemplarUsuarioId: exemplar.usuID,
+                                  exemplarId: exemplar.id,
+                                  negotiationTypeId: selectedNegotiationTypeId,
+                                ),
+                              ),
+                            );
+                          } else {
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: Text(
+                                    'Erro',
+                                    style: TextStyle(
+                                      fontFamily: 'Poppins',
+                                      fontSize: responsiveFontSize(16.0),
+                                    ),
+                                  ),
+                                  content: Text(
+                                    'Por favor, selecione um tipo de negociação',
+                                    style: TextStyle(
+                                      fontFamily: 'Poppins',
+                                      fontSize: responsiveFontSize(14.0),
+                                    ),
+                                  ),
+                                  actions: <Widget>[
+                                    TextButton(
+                                      child: Text(
+                                        'Fechar',
+                                        style: TextStyle(
+                                          fontFamily: 'Poppins',
+                                          fontSize: responsiveFontSize(14.0),
                                         ),
                                       ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            },
-                          );
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                      },
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          }
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xff4e90cd),
@@ -548,7 +505,8 @@ class _ProdutoState extends State<Produto> {
     );
   }
 
-  Widget _buildCircle(String text, int index) {
+  Widget _buildCircle(String text, int index, String attribute, String id) {
+    print("id dentro do build circle:" + id);
     double radius = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
 
@@ -573,6 +531,7 @@ class _ProdutoState extends State<Produto> {
                 if (i == index) {
                   isSelected[i] = true;
                   selectedText = text;
+                  selectedNegotiationTypeId = id;
                 } else {
                   isSelected[i] = false;
                 }
@@ -609,7 +568,7 @@ class _ProdutoState extends State<Produto> {
         ),
         if (text == 'Empréstimo')
           Text(
-            'Prazo: *prazo da API*',
+            'Prazo: $attribute',
             style: TextStyle(
               color: const Color(0xff4e90cd),
               fontFamily: 'Poppins',
@@ -637,7 +596,7 @@ class _ProdutoState extends State<Produto> {
           ),
         if (text == 'Venda')
           Text(
-            'R\$ *valor da API*',
+            'R\$ $attribute',
             style: TextStyle(
               color: const Color(0xff4e90cd),
               fontFamily: 'Poppins',
