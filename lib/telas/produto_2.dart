@@ -1,12 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:projeto_pagina/data/models/exemplar_detalhes_model.dart';
 import 'package:projeto_pagina/services/exemplar_detalhes_service.dart';
+import 'package:projeto_pagina/services/transacao_service.dart';
 import 'package:projeto_pagina/telas/configuracoes_lista_de_desejos.dart';
 
 class Produto2 extends StatefulWidget {
   final String exemplarId;
+  final String tipoTransacao;
+  final String statusTransacao;
+  final String transacaoId;
 
-  const Produto2({Key? key, required this.exemplarId}) : super(key: key);
+  const Produto2({
+    Key? key,
+    required this.exemplarId,
+    required this.tipoTransacao,
+    required this.statusTransacao,
+    required this.transacaoId,
+  }) : super(key: key);
 
   @override
   State<Produto2> createState() => _Produto2State();
@@ -352,12 +362,81 @@ class _Produto2State extends State<Produto2> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          _buildCircle('Empréstimo', 0),
-                          _buildCircle('Troca', 1),
-                          _buildCircle('Venda', 2),
+                          for (int i = 0; i < isSelected.length; i++)
+                            if (widget.tipoTransacao == 'Emprestimo' && i == 0)
+                              _buildCircle(
+                                  'Emprestimo',
+                                  i,
+                                  exemplar.prazo == null
+                                      ? 'Indefinido'
+                                      : "${exemplar.prazo} dias")
+                            else if (widget.tipoTransacao == 'Troca' && i == 1)
+                              _buildCircle('Troca', i, '')
+                            else if (widget.tipoTransacao == 'Venda' && i == 2)
+                              _buildCircle(
+                                'Venda',
+                                i,
+                                exemplar.preco == null
+                                    ? '0'
+                                    : exemplar.preco.toString(),
+                              )
                         ],
                       ),
                       SizedBox(height: screenHeight * 0.05),
+                      ElevatedButton(
+                        onPressed: () async {
+                          bool success = await _handleAceitarNegociacao();
+
+                          if (success && mounted) {
+                            Navigator.pop(context);
+                            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  'Negociação aceita com sucesso!',
+                                  style: TextStyle(
+                                    fontFamily: 'Poppins',
+                                    fontSize: responsiveFontSize(16.0),
+                                  ),
+                                ),
+                                duration: const Duration(seconds: 5),
+                                backgroundColor: const Color(0xff4ecd72),
+                              ),
+                            );
+                          } else if (mounted) {
+                            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  'Erro ao aceitar negociação!',
+                                  style: TextStyle(
+                                    fontFamily: 'Poppins',
+                                    fontSize: responsiveFontSize(16.0),
+                                  ),
+                                ),
+                                duration: const Duration(seconds: 5),
+                                backgroundColor: const Color(0xffec4e4e),
+                              ),
+                            );
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xff4e90cd),
+                          foregroundColor: const Color(0xfff6f5f2),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                        ),
+                        child: Text(
+                          "Aceitar negociação",
+                          style: TextStyle(
+                            fontSize: responsiveFontSize(16.0),
+                            fontFamily: 'Poppins',
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: screenHeight * 0.02),
                     ],
                   );
                 }
@@ -370,7 +449,7 @@ class _Produto2State extends State<Produto2> {
     );
   }
 
-  Widget _buildCircle(String text, int index) {
+  Widget _buildCircle(String text, int index, String attribute) {
     double radius = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
 
@@ -431,7 +510,7 @@ class _Produto2State extends State<Produto2> {
         ),
         if (text == 'Empréstimo')
           Text(
-            'Prazo: *prazo da API*',
+            'Prazo: $attribute',
             style: TextStyle(
               color: const Color(0xff4e90cd),
               fontFamily: 'Poppins',
@@ -459,7 +538,7 @@ class _Produto2State extends State<Produto2> {
           ),
         if (text == 'Venda')
           Text(
-            'R\$ *valor da API*',
+            'R\$ $attribute',
             style: TextStyle(
               color: const Color(0xff4e90cd),
               fontFamily: 'Poppins',
@@ -579,5 +658,14 @@ class _Produto2State extends State<Produto2> {
         ],
       ),
     );
+  }
+
+  Future<bool> _handleAceitarNegociacao() async {
+    try {
+      await TransacaoService().aceitarTransacao(widget.transacaoId);
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 }
