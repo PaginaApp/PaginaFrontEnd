@@ -1297,25 +1297,22 @@ class _ConfiguracoesAcervoCadastrosAddState
   }
 
   Future<bool> _handleCreateExemplar() async {
-    bool negociando = selectedNegotiationTypes.isNotEmpty;
-
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String userId = prefs.getString('userId') ?? '';
 
     priceController.text = priceController.text.replaceAll(',', '.');
-    double? preco = double.tryParse(priceController.text);
+    String? preco = priceController.text;
 
     int? prazo = int.tryParse(daysController.text);
     try {
       await ExemplarRepository().createExemplar(
         descriptionController.text,
-        negociando,
         livroId,
         userId,
         selectedPageStateId,
         selectedCoverStateId,
         selectedNegotiationTypes,
-        preco,
+        preco == '' ? null : preco,
         prazo,
       );
       return true;
