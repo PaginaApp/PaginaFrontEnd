@@ -6,9 +6,13 @@ import 'package:projeto_pagina/telas/configuracoes_lista_de_desejos.dart';
 
 class ProdutoNegociacaoNegociacoes extends StatefulWidget {
   final String exemplarId;
+  final String tipoTransacao;
 
-  const ProdutoNegociacaoNegociacoes({Key? key, required this.exemplarId})
-      : super(key: key);
+  const ProdutoNegociacaoNegociacoes({
+    Key? key,
+    required this.exemplarId,
+    required this.tipoTransacao,
+  }) : super(key: key);
 
   @override
   State<ProdutoNegociacaoNegociacoes> createState() =>
@@ -356,9 +360,24 @@ class _ProdutoNegociacaoNegociacoesState
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          _buildCircle('Empréstimo', 0),
-                          _buildCircle('Troca', 1),
-                          _buildCircle('Venda', 2),
+                          for (int i = 0; i < isSelected.length; i++)
+                            if (widget.tipoTransacao == 'Emprestimo' && i == 0)
+                              _buildCircle(
+                                  'Emprestimo',
+                                  i,
+                                  exemplar.prazo == null
+                                      ? 'Indefinido'
+                                      : "${exemplar.prazo} dias")
+                            else if (widget.tipoTransacao == 'Troca' && i == 1)
+                              _buildCircle('Troca', i, '')
+                            else if (widget.tipoTransacao == 'Venda' && i == 2)
+                              _buildCircle(
+                                'Venda',
+                                i,
+                                exemplar.preco == null
+                                    ? '0'
+                                    : exemplar.preco.toString(),
+                              )
                         ],
                       ),
                       SizedBox(height: screenHeight * 0.05),
@@ -463,7 +482,7 @@ class _ProdutoNegociacaoNegociacoesState
     );
   }
 
-  Widget _buildCircle(String text, int index) {
+  Widget _buildCircle(String text, int index, String attribute) {
     double radius = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
 
@@ -524,7 +543,7 @@ class _ProdutoNegociacaoNegociacoesState
         ),
         if (text == 'Empréstimo')
           Text(
-            'Prazo: *prazo da API*',
+            'Prazo: $attribute',
             style: TextStyle(
               color: const Color(0xff4e90cd),
               fontFamily: 'Poppins',
@@ -552,7 +571,7 @@ class _ProdutoNegociacaoNegociacoesState
           ),
         if (text == 'Venda')
           Text(
-            'R\$ *valor da API*',
+            'R\$ $attribute',
             style: TextStyle(
               color: const Color(0xff4e90cd),
               fontFamily: 'Poppins',
