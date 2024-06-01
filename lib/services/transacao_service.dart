@@ -22,8 +22,6 @@ class TransacaoService {
         'Content-Type': 'application/json',
       },
     );
-    print("Printando response.body dentro do service");
-    print(response.body);
 
     if (response.statusCode != 201) {
       throw Exception('Erro ao criar transação');
@@ -41,11 +39,6 @@ class TransacaoService {
         'Content-Type': 'application/json',
       },
     );
-
-    print(
-        "printando dentro do transacao service na parte de aceitar trnasacao");
-    print(response.body);
-    print(response.statusCode);
 
     if (response.statusCode != 200) {
       throw Exception('Erro ao aceitar transação');

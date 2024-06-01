@@ -1,6 +1,7 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:projeto_pagina/services/authentication_service.dart';
-import 'package:projeto_pagina/telas/login.dart';
 import 'package:projeto_pagina/telas/termos_de_uso_certo.dart';
 import 'package:projeto_pagina/telas/termos_de_uso_errado.dart';
 
@@ -41,7 +42,6 @@ class TermosDeUso extends StatefulWidget {
 }
 
 class _TermosDeUsoState extends State<TermosDeUso> {
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool concordo = false;
 
   @override
@@ -51,14 +51,6 @@ class _TermosDeUsoState extends State<TermosDeUso> {
 
     double responsiveFontSize(double fontSize) {
       return fontSize * screenWidth / 375.0;
-    }
-
-    // ignore: no_leading_underscores_for_local_identifiers
-    String? _validateRequiredField(String? value) {
-      if (value == null || value.isEmpty) {
-        return 'Campo obrigatório';
-      }
-      return null;
     }
 
     return Scaffold(
@@ -186,20 +178,6 @@ class _TermosDeUsoState extends State<TermosDeUso> {
                                           const TermosDeUsoErrado()),
                                 );
                               }
-                              // if (_formKey.currentState?.validate() ?? false) {
-                              //   Navigator.push(
-                              //     context,
-                              //     MaterialPageRoute(
-                              //         builder: (context) => const Cadastro1()),
-                              //   );
-                              // }
-
-                              // temporario
-                              // Navigator.push(
-                              //   context,
-                              //   MaterialPageRoute(
-                              //       builder: (context) => const Cadastro1()),
-                              // );
                             }
                           : null,
                       style: ElevatedButton.styleFrom(
@@ -261,7 +239,6 @@ class _TermosDeUsoState extends State<TermosDeUso> {
       );
       return true;
     } catch (e) {
-      print(e);
       return false;
     }
   }

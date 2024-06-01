@@ -1,10 +1,14 @@
+import 'package:diacritic/diacritic.dart';
 import 'package:flutter/material.dart';
+import 'package:projeto_pagina/data/models/dados_pessoais_model.dart';
 import 'package:projeto_pagina/data/models/exemplar_detalhes_model.dart';
+import 'package:projeto_pagina/services/dados_pessoais_service.dart';
 import 'package:projeto_pagina/services/exemplar_detalhes_service.dart';
 import 'package:projeto_pagina/telas/configuracoes_lista_de_desejos.dart';
 
 class Produto3 extends StatefulWidget {
   final String exemplarId;
+  final String transacaoAnuncianteId;
   final String tipoTransacao;
   final String statusTransacao;
   final String transacaoId;
@@ -12,6 +16,7 @@ class Produto3 extends StatefulWidget {
   const Produto3({
     Key? key,
     required this.exemplarId,
+    required this.transacaoAnuncianteId,
     required this.tipoTransacao,
     required this.statusTransacao,
     required this.transacaoId,
@@ -24,11 +29,12 @@ class Produto3 extends StatefulWidget {
 class _Produto3State extends State<Produto3> {
   final ExemplarDetalhesService _exemplarService = ExemplarDetalhesService();
   late Future<ExemplarDetalhesModel> _exemplarDetalhesFuture;
+  late Future<DadosPessoaisModel> _dadosPessoaisFuture;
 
   final _controller = PageController();
 
   String selectedText = 'Total';
-  List<bool> isSelected = [false, false, false];
+  List<bool> isSelected = [false, false, false, false];
 
   @override
   void initState() {
@@ -36,6 +42,8 @@ class _Produto3State extends State<Produto3> {
 
     _exemplarDetalhesFuture =
         _exemplarService.fetchExemplarDetalhes(widget.exemplarId);
+    _dadosPessoaisFuture =
+        DadosPessoaisService().fetchDadosPessoais(widget.transacaoAnuncianteId);
   }
 
   @override
@@ -55,7 +63,7 @@ class _Produto3State extends State<Produto3> {
             AppBar(
               backgroundColor: const Color(0xfff6f5f2),
               title: Text(
-                'Livro',
+                'Livro solicitado',
                 style: TextStyle(
                   fontFamily: 'Poppins',
                   fontSize: responsiveFontSize(18),
@@ -262,7 +270,6 @@ class _Produto3State extends State<Produto3> {
                             horizontal: screenWidth * 0.05),
                         child: Align(
                           alignment: Alignment.centerLeft,
-                          // Trocar pela sinopse do livro quando a API estiver pronta
                           child: Text(
                             exemplar.sinopse,
                             style: TextStyle(
@@ -362,9 +369,11 @@ class _Produto3State extends State<Produto3> {
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
                           for (int i = 0; i < isSelected.length; i++)
-                            if (widget.tipoTransacao == 'Emprestimo' && i == 0)
+                            if (removeDiacritics(widget.tipoTransacao) ==
+                                    'Emprestimo' &&
+                                i == 0)
                               _buildCircle(
-                                  'Emprestimo',
+                                  'Empréstimo',
                                   i,
                                   exemplar.prazo == null
                                       ? 'Indefinido'
@@ -379,9 +388,188 @@ class _Produto3State extends State<Produto3> {
                                     ? '0'
                                     : exemplar.preco.toString(),
                               )
+                            else if (widget.tipoTransacao == 'Doação' && i == 3)
+                              _buildCircle('Doação', i, ''),
                         ],
                       ),
                       SizedBox(height: screenHeight * 0.05),
+                      Padding(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: screenWidth * 0.05),
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            'Negociação com:',
+                            style: TextStyle(
+                              fontFamily: 'Poppins',
+                              fontSize: responsiveFontSize(16),
+                              color: const Color(0xff14131a),
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: screenHeight * 0.02),
+                      Padding(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: screenWidth * 0.05),
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: FutureBuilder<DadosPessoaisModel>(
+                            future: _dadosPessoaisFuture,
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return const Center(
+                                    child: CircularProgressIndicator());
+                              } else if (snapshot.hasError) {
+                                return Center(
+                                  child: SizedBox(
+                                    height: screenHeight * 0.2,
+                                    width: screenWidth * 2,
+                                    child: Text(
+                                      'Erro ao carregar nome de usuário e título',
+                                      style: TextStyle(
+                                          fontFamily: 'Poppins',
+                                          fontSize: responsiveFontSize(14),
+                                          color: const Color(0xfff6f5f2),
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
+                                );
+                              } else {
+                                final solicitante = snapshot.data!;
+                                return Container(
+                                  padding: EdgeInsets.all(screenWidth * 0.02),
+                                  color: const Color(0xffbabdd3),
+                                  // ignore: sized_box_for_whitespace
+                                  child: Container(
+                                    height: screenHeight * 0.2,
+                                    width: screenWidth * 2,
+                                    child: Row(
+                                      children: [
+                                        FutureBuilder<Image>(
+                                          future: DadosPessoaisService()
+                                              .fetchAvatar(
+                                                  widget.transacaoAnuncianteId),
+                                          builder: (context, snapshot) {
+                                            if (snapshot.connectionState ==
+                                                ConnectionState.waiting) {
+                                              return const Center(
+                                                  child:
+                                                      CircularProgressIndicator());
+                                            } else if (snapshot.hasError) {
+                                              return Center(
+                                                child: Text(
+                                                  'Erro ao carregar imagem',
+                                                  style: TextStyle(
+                                                    color:
+                                                        const Color(0xfff6f5f2),
+                                                    fontFamily: 'Poppins',
+                                                    fontSize:
+                                                        responsiveFontSize(14),
+                                                  ),
+                                                ),
+                                              );
+                                            } else {
+                                              final image = snapshot.data!;
+                                              return CircleAvatar(
+                                                radius: screenWidth * 0.05,
+                                                backgroundColor:
+                                                    const Color(0xfff6f5f2),
+                                                child: image,
+                                              );
+                                            }
+                                          },
+                                        ),
+                                        SizedBox(width: screenWidth * 0.02),
+                                        Flexible(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                solicitante.nome,
+                                                style: TextStyle(
+                                                  fontSize:
+                                                      responsiveFontSize(14.0),
+                                                  fontFamily: 'Poppins',
+                                                  fontWeight: FontWeight.bold,
+                                                  color:
+                                                      const Color(0xff14131a),
+                                                ),
+                                              ),
+                                              SizedBox(
+                                                  height: screenHeight * 0.02),
+                                              Row(
+                                                children: [
+                                                  Icon(
+                                                    Icons.phone,
+                                                    color:
+                                                        const Color(0xfff6f5f2),
+                                                    size: responsiveFontSize(
+                                                        20.0),
+                                                  ),
+                                                  SizedBox(
+                                                      width:
+                                                          screenWidth * 0.01),
+                                                  Flexible(
+                                                    child: Text(
+                                                      solicitante.telefone,
+                                                      style: TextStyle(
+                                                        fontSize:
+                                                            responsiveFontSize(
+                                                                12.0),
+                                                        fontFamily: 'Poppins',
+                                                        color: const Color(
+                                                            0xff14131a),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                              SizedBox(
+                                                  height: screenHeight * 0.005),
+                                              Row(
+                                                children: [
+                                                  Icon(
+                                                    Icons.email,
+                                                    color:
+                                                        const Color(0xfff6f5f2),
+                                                    size: responsiveFontSize(
+                                                        20.0),
+                                                  ),
+                                                  SizedBox(
+                                                      width:
+                                                          screenWidth * 0.01),
+                                                  Flexible(
+                                                    child: Text(
+                                                      solicitante.email,
+                                                      style: TextStyle(
+                                                        fontSize:
+                                                            responsiveFontSize(
+                                                                12.0),
+                                                        fontFamily: 'Poppins',
+                                                        color: const Color(
+                                                            0xff14131a),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              }
+                            },
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: screenHeight * 0.03),
                     ],
                   );
                 }
@@ -406,6 +594,7 @@ class _Produto3State extends State<Produto3> {
       'Empréstimo': 'assets/png/emprestimo.png',
       'Troca': 'assets/png/troca.png',
       'Venda': 'assets/png/venda.png',
+      'Doação': 'assets/png/doacao.png',
     };
     return Column(
       children: [
@@ -413,7 +602,6 @@ class _Produto3State extends State<Produto3> {
           borderWidth: 0.0,
           isSelected: [isSelected[index]],
           onPressed: (int newIndex) {
-            // também preciso adicionar a lógica de negociação
             setState(() {
               for (int i = 0; i < isSelected.length; i++) {
                 if (i == index) {
@@ -484,6 +672,15 @@ class _Produto3State extends State<Produto3> {
         if (text == 'Venda')
           Text(
             'R\$ $attribute',
+            style: TextStyle(
+              color: const Color(0xff4e90cd),
+              fontFamily: 'Poppins',
+              fontSize: responsiveFontSize(11.0),
+            ),
+          ),
+        if (text == 'Doação')
+          Text(
+            'Sem custo',
             style: TextStyle(
               color: const Color(0xff4e90cd),
               fontFamily: 'Poppins',

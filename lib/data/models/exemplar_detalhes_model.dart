@@ -17,6 +17,7 @@ class ExemplarDetalhesModel {
   final String ecpId;
   final String estadoPaginas;
   final String epgId;
+  final List<String> tiposTransacoes;
 
   ExemplarDetalhesModel({
     required this.id,
@@ -37,6 +38,7 @@ class ExemplarDetalhesModel {
     required this.ecpId,
     required this.estadoPaginas,
     required this.epgId,
+    required this.tiposTransacoes,
   });
 
   factory ExemplarDetalhesModel.fromJson(Map<String, dynamic> json) {
@@ -65,6 +67,9 @@ class ExemplarDetalhesModel {
       ecpId: json['estadoCapa']['ecp_Id'],
       estadoPaginas: json['estadoPaginas']['epg_Nome'],
       epgId: json['estadoPaginas']['epg_Id'],
+      tiposTransacoes: [
+        for (var item in json['tiposTransacoes']) item['ttr_Nome']
+      ],
     );
   }
 }

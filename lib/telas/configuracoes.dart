@@ -3,13 +3,10 @@ import 'package:projeto_pagina/data/models/dados_pessoais_model.dart';
 import 'package:projeto_pagina/services/dados_pessoais_service.dart';
 import 'package:projeto_pagina/telas/configuracoes_acervo_cadastros.dart';
 import 'package:projeto_pagina/telas/configuracoes_alterar_senha.dart';
-import 'package:projeto_pagina/telas/configuracoes_avaliacoes_titulos.dart';
 import 'package:projeto_pagina/telas/configuracoes_excluir.dart';
-import 'package:projeto_pagina/telas/configuracoes_historico.dart';
 import 'package:projeto_pagina/telas/configuracoes_lista_de_desejos.dart';
 import 'package:projeto_pagina/telas/configuracoes_logout.dart';
 import 'package:projeto_pagina/telas/configuracoes_meus_dados.dart';
-import 'package:projeto_pagina/telas/configuracoes_suporte.dart';
 import 'package:projeto_pagina/telas/configuracoes_termos_uso.dart';
 
 class Configuracoes extends StatefulWidget {
@@ -83,15 +80,6 @@ class _ConfiguracoesState extends State<Configuracoes> {
                   }
                 },
               ),
-              // Positioned(
-              //   left: screenWidth * 0.05,
-              //   top: screenHeight * 0.1,
-              //   child: CircleAvatar(
-              //     radius: screenWidth * 0.08,
-              //     backgroundColor: const Color(0xfff6f5f2),
-              //     child: Icon(Icons.person, size: screenWidth * 0.07),
-              //   ),
-              // ),
 
               // Começo do future builder com nome de usuário e título
               FutureBuilder<DadosPessoaisModel>(
@@ -228,10 +216,6 @@ class _ConfiguracoesState extends State<Configuracoes> {
             ),
             _buildButton(
                 'Meu acervo', Icons.book, const ConfiguracoesAcervoCadastros()),
-            _buildButton('Avaliações e Títulos', Icons.star,
-                const ConfiguracoesAvaliacoesTitulos()),
-            _buildButton(
-                'Histórico', Icons.history, const ConfiguracoesHistorico()),
             _buildButton('Lista de desejos', Icons.favorite,
                 const ConfiguracoesListaDeDesejos()),
             SizedBox(height: screenHeight * 0.01),
@@ -243,8 +227,6 @@ class _ConfiguracoesState extends State<Configuracoes> {
                   color: const Color(0xff14131a),
                   fontWeight: FontWeight.bold),
             ),
-            _buildButton(
-                'Suporte', Icons.support_agent, const ConfiguracoesSuporte()),
             _buildButton('Termos de uso', Icons.description,
                 const ConfiguracoesTermosUso()),
             _buildButton('Logout', Icons.logout, const ConfiguracoesLogout()),

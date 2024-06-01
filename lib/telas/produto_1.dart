@@ -1,3 +1,4 @@
+import 'package:diacritic/diacritic.dart';
 import 'package:flutter/material.dart';
 import 'package:projeto_pagina/data/models/exemplar_detalhes_model.dart';
 import 'package:projeto_pagina/services/exemplar_detalhes_service.dart';
@@ -19,7 +20,7 @@ class _Produto1State extends State<Produto1> {
   final _controller = PageController();
 
   String selectedText = 'Total';
-  List<bool> isSelected = [false, false, false];
+  List<bool> isSelected = [false, false, false, false];
 
   @override
   void initState() {
@@ -253,7 +254,6 @@ class _Produto1State extends State<Produto1> {
                             horizontal: screenWidth * 0.05),
                         child: Align(
                           alignment: Alignment.centerLeft,
-                          // Trocar pela sinopse do livro quando a API estiver pronta
                           child: Text(
                             exemplar.sinopse,
                             style: TextStyle(
@@ -352,9 +352,61 @@ class _Produto1State extends State<Produto1> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          _buildCircle('Empréstimo', 0),
-                          _buildCircle('Troca', 1),
-                          _buildCircle('Venda', 2),
+                          if (exemplar.tiposTransacoes.isEmpty)
+                            Text(
+                              'Não há formas de negociação disponíveis',
+                              style: TextStyle(
+                                fontFamily: 'Poppins',
+                                fontSize: responsiveFontSize(12),
+                                color: const Color(0xff14131a),
+                              ),
+                            )
+                          else
+                            Column(
+                              children: [
+                                Row(
+                                  children: [
+                                    for (var tipo in exemplar.tiposTransacoes)
+                                      if (removeDiacritics(tipo) ==
+                                          'Emprestimo') ...[
+                                        _buildCircle(
+                                            'Empréstimo',
+                                            0,
+                                            exemplar.prazo == null
+                                                ? 'Indefinido'
+                                                : "${exemplar.prazo} dias"),
+                                        SizedBox(width: screenWidth * 0.07)
+                                      ] else if (tipo == 'Troca')
+                                        _buildCircle(
+                                          'Troca',
+                                          1,
+                                          '',
+                                        )
+                                  ],
+                                ),
+                                SizedBox(height: screenHeight * 0.02),
+                                Row(
+                                  children: [
+                                    for (var tipo in exemplar.tiposTransacoes)
+                                      if (tipo == 'Venda') ...[
+                                        _buildCircle(
+                                          'Venda',
+                                          2,
+                                          exemplar.preco == null
+                                              ? '0'
+                                              : exemplar.preco.toString(),
+                                        ),
+                                        SizedBox(width: screenWidth * 0.2),
+                                      ] else if (tipo == 'Doação')
+                                        _buildCircle(
+                                          'Doação',
+                                          3,
+                                          '',
+                                        )
+                                  ],
+                                ),
+                              ],
+                            )
                         ],
                       ),
                       SizedBox(height: screenHeight * 0.05),
@@ -370,7 +422,7 @@ class _Produto1State extends State<Produto1> {
     );
   }
 
-  Widget _buildCircle(String text, int index) {
+  Widget _buildCircle(String text, int index, String attribute) {
     double radius = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
 
@@ -382,6 +434,7 @@ class _Produto1State extends State<Produto1> {
       'Empréstimo': 'assets/png/emprestimo.png',
       'Troca': 'assets/png/troca.png',
       'Venda': 'assets/png/venda.png',
+      'Doação': 'assets/png/doacao.png',
     };
     return Column(
       children: [
@@ -389,7 +442,6 @@ class _Produto1State extends State<Produto1> {
           borderWidth: 0.0,
           isSelected: [isSelected[index]],
           onPressed: (int newIndex) {
-            // também preciso adicionar a lógica de negociação
             setState(() {
               for (int i = 0; i < isSelected.length; i++) {
                 if (i == index) {
@@ -431,7 +483,7 @@ class _Produto1State extends State<Produto1> {
         ),
         if (text == 'Empréstimo')
           Text(
-            'Prazo: *prazo da API*',
+            'Prazo: $attribute',
             style: TextStyle(
               color: const Color(0xff4e90cd),
               fontFamily: 'Poppins',
@@ -459,7 +511,16 @@ class _Produto1State extends State<Produto1> {
           ),
         if (text == 'Venda')
           Text(
-            'R\$ *valor da API*',
+            'R\$ $attribute',
+            style: TextStyle(
+              color: const Color(0xff4e90cd),
+              fontFamily: 'Poppins',
+              fontSize: responsiveFontSize(11.0),
+            ),
+          ),
+        if (text == 'Doação')
+          Text(
+            'Sem custo',
             style: TextStyle(
               color: const Color(0xff4e90cd),
               fontFamily: 'Poppins',

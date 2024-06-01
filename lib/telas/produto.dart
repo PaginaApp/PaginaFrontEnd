@@ -1,5 +1,5 @@
+import 'package:diacritic/diacritic.dart';
 import 'package:flutter/material.dart';
-//import 'package:dots_indicator/dots_indicator.dart';
 import 'package:projeto_pagina/data/models/exemplar_detalhes_model.dart';
 import 'package:projeto_pagina/data/models/tipo_transacao_model.dart';
 import 'package:projeto_pagina/services/exemplar_detalhes_service.dart';
@@ -25,20 +25,13 @@ class _ProdutoState extends State<Produto> {
   String selectedNegotiationTypeId = '';
 
   final _controller = PageController();
-  //late final PageController _controller;
-  //int _currentPage = 0;
+
   String selectedText = 'Total';
-  List<bool> isSelected = [false, false, false];
+  List<bool> isSelected = [false, false, false, false];
 
   @override
   void initState() {
     super.initState();
-
-    // _controller.addListener(() {
-    //   setState(() {
-    //     _currentPage = _controller.page!.toInt();
-    //   });
-    // });
 
     _exemplarDetalhesFuture =
         _exemplarService.fetchExemplarDetalhes(widget.exemplarId);
@@ -147,19 +140,7 @@ class _ProdutoState extends State<Produto> {
                                   ),
                                 ),
                                 SizedBox(height: screenHeight * 0.015),
-                                // DotsIndicator(
-                                //   dotsCount: snapshot.data!.length,
-                                //   position: _currentPage,
-                                //   decorator: DotsDecorator(
-                                //     activeColor: const Color(0xff14131a),
-                                //     size: Size.square(screenWidth * 0.02),
-                                //     activeSize: Size(screenWidth * 0.025,
-                                //         screenWidth * 0.025),
-                                //     activeShape: RoundedRectangleBorder(
-                                //       borderRadius: BorderRadius.circular(8.0),
-                                //     ),
-                                //   ),
-                                // ),
+
                                 SizedBox(
                                   width: screenWidth * 0.9,
                                   child: Text(
@@ -186,8 +167,6 @@ class _ProdutoState extends State<Produto> {
                         child: Align(
                           alignment: Alignment.centerLeft,
                           child: Text(
-                            // Trocar pelo título do livro quando a API estiver pronta
-                            //'Título do livro - ISBN',
                             '${exemplar.titulo} - ISBN ${exemplar.isbn}',
                             style: TextStyle(
                               fontFamily: 'Poppins',
@@ -279,7 +258,6 @@ class _ProdutoState extends State<Produto> {
                             horizontal: screenWidth * 0.05),
                         child: Align(
                           alignment: Alignment.centerLeft,
-                          // Trocar pela sinopse do livro quando a API estiver pronta
                           child: Text(
                             exemplar.sinopse,
                             style: TextStyle(
@@ -401,22 +379,70 @@ class _ProdutoState extends State<Produto> {
                             return Row(
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               children: [
-                                _buildCircle(
-                                    'Empréstimo',
-                                    0,
-                                    exemplar.prazo == null
-                                        ? 'Indefinido'
-                                        : "${exemplar.prazo} dias",
-                                    tipoTransacao[0].id),
-                                _buildCircle(
-                                    'Troca', 1, '', tipoTransacao[3].id),
-                                _buildCircle(
-                                    'Venda',
-                                    2,
-                                    exemplar.preco == null
-                                        ? '0'
-                                        : exemplar.preco.toString(),
-                                    tipoTransacao[1].id),
+                                if (exemplar.tiposTransacoes.isEmpty)
+                                  Text(
+                                    'Nenhuma forma de negociação disponível',
+                                    style: TextStyle(
+                                      color: const Color(0xffcd4e4e),
+                                      fontSize: responsiveFontSize(13.0),
+                                      fontWeight: FontWeight.bold,
+                                      fontFamily: 'Poppins',
+                                    ),
+                                  )
+                                else
+                                  Column(
+                                    children: [
+                                      Row(
+                                        children: [
+                                          for (var tipo
+                                              in exemplar.tiposTransacoes)
+                                            if (removeDiacritics(tipo) ==
+                                                'Emprestimo') ...[
+                                              _buildCircle(
+                                                  'Empréstimo',
+                                                  0,
+                                                  exemplar.prazo == null
+                                                      ? 'Indefinido'
+                                                      : "${exemplar.prazo} dias",
+                                                  tipoTransacao[0].id),
+                                              SizedBox(
+                                                  width: screenWidth * 0.07)
+                                            ] else if (tipo == 'Troca')
+                                              _buildCircle(
+                                                'Troca',
+                                                1,
+                                                '',
+                                                tipoTransacao[3].id,
+                                              )
+                                        ],
+                                      ),
+                                      SizedBox(height: screenHeight * 0.02),
+                                      Row(
+                                        children: [
+                                          for (var tipo
+                                              in exemplar.tiposTransacoes)
+                                            if (tipo == 'Venda') ...[
+                                              _buildCircle(
+                                                'Venda',
+                                                2,
+                                                exemplar.preco == null
+                                                    ? '0'
+                                                    : exemplar.preco.toString(),
+                                                tipoTransacao[1].id,
+                                              ),
+                                              SizedBox(
+                                                  width: screenWidth * 0.2),
+                                            ] else if (tipo == 'Doação')
+                                              _buildCircle(
+                                                'Doação',
+                                                3,
+                                                '',
+                                                tipoTransacao[2].id,
+                                              )
+                                        ],
+                                      ),
+                                    ],
+                                  )
                               ],
                             );
                           }
@@ -426,56 +452,60 @@ class _ProdutoState extends State<Produto> {
                       // fim dos tipos de negociação
                       SizedBox(height: screenHeight * 0.02),
                       ElevatedButton(
-                        onPressed: () {
-                          if (selectedNegotiationTypeId != '') {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => ConfirmarNegociacao(
-                                  exemplarUsuarioId: exemplar.usuID,
-                                  exemplarId: exemplar.id,
-                                  negotiationTypeId: selectedNegotiationTypeId,
-                                ),
-                              ),
-                            );
-                          } else {
-                            showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return AlertDialog(
-                                  title: Text(
-                                    'Erro',
-                                    style: TextStyle(
-                                      fontFamily: 'Poppins',
-                                      fontSize: responsiveFontSize(16.0),
-                                    ),
-                                  ),
-                                  content: Text(
-                                    'Por favor, selecione um tipo de negociação',
-                                    style: TextStyle(
-                                      fontFamily: 'Poppins',
-                                      fontSize: responsiveFontSize(14.0),
-                                    ),
-                                  ),
-                                  actions: <Widget>[
-                                    TextButton(
-                                      child: Text(
-                                        'Fechar',
-                                        style: TextStyle(
-                                          fontFamily: 'Poppins',
-                                          fontSize: responsiveFontSize(14.0),
-                                        ),
+                        onPressed: exemplar.tiposTransacoes.isEmpty
+                            ? null
+                            : () {
+                                if (selectedNegotiationTypeId != '') {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => ConfirmarNegociacao(
+                                        exemplarUsuarioId: exemplar.usuID,
+                                        exemplarId: exemplar.id,
+                                        negotiationTypeId:
+                                            selectedNegotiationTypeId,
                                       ),
-                                      onPressed: () {
-                                        Navigator.of(context).pop();
-                                      },
                                     ),
-                                  ],
-                                );
+                                  );
+                                } else {
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return AlertDialog(
+                                        title: Text(
+                                          'Erro',
+                                          style: TextStyle(
+                                            fontFamily: 'Poppins',
+                                            fontSize: responsiveFontSize(16.0),
+                                          ),
+                                        ),
+                                        content: Text(
+                                          'Por favor, selecione um tipo de negociação',
+                                          style: TextStyle(
+                                            fontFamily: 'Poppins',
+                                            fontSize: responsiveFontSize(14.0),
+                                          ),
+                                        ),
+                                        actions: <Widget>[
+                                          TextButton(
+                                            child: Text(
+                                              'Fechar',
+                                              style: TextStyle(
+                                                fontFamily: 'Poppins',
+                                                fontSize:
+                                                    responsiveFontSize(14.0),
+                                              ),
+                                            ),
+                                            onPressed: () {
+                                              Navigator.of(context).pop();
+                                            },
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  );
+                                }
                               },
-                            );
-                          }
-                        },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xff4e90cd),
                           foregroundColor: const Color(0xfff6f5f2),
@@ -506,7 +536,6 @@ class _ProdutoState extends State<Produto> {
   }
 
   Widget _buildCircle(String text, int index, String attribute, String id) {
-    print("id dentro do build circle:" + id);
     double radius = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
 
@@ -518,6 +547,7 @@ class _ProdutoState extends State<Produto> {
       'Empréstimo': 'assets/png/emprestimo.png',
       'Troca': 'assets/png/troca.png',
       'Venda': 'assets/png/venda.png',
+      'Doação': 'assets/png/doacao.png',
     };
     return Column(
       children: [
@@ -525,7 +555,6 @@ class _ProdutoState extends State<Produto> {
           borderWidth: 0.0,
           isSelected: [isSelected[index]],
           onPressed: (int newIndex) {
-            // também preciso adicionar a lógica de negociação
             setState(() {
               for (int i = 0; i < isSelected.length; i++) {
                 if (i == index) {
@@ -603,6 +632,15 @@ class _ProdutoState extends State<Produto> {
               fontSize: responsiveFontSize(11.0),
             ),
           ),
+        if (text == 'Doação')
+          Text(
+            'Sem custo',
+            style: TextStyle(
+              color: const Color(0xff4e90cd),
+              fontFamily: 'Poppins',
+              fontSize: responsiveFontSize(11.0),
+            ),
+          ),
       ],
     );
   }
@@ -649,7 +687,7 @@ class _ProdutoState extends State<Produto> {
             color: Colors.grey.withOpacity(0.5),
             spreadRadius: 5,
             blurRadius: 7,
-            offset: const Offset(0, 3), // changes position of shadow
+            offset: const Offset(0, 3),
           ),
         ],
       ),

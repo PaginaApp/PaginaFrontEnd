@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:projeto_pagina/data/models/dados_pessoais_model.dart';
 import 'package:projeto_pagina/services/dados_pessoais_service.dart';
@@ -89,7 +91,6 @@ class _ConfirmarNegociacaoState extends State<ConfirmarNegociacao> {
                         userId == widget.exemplarUsuarioId
                             ? 'Você não pode'
                             : 'Você deseja',
-                        //'Você deseja',
                         style: TextStyle(
                           fontFamily: 'Poppins',
                           color: const Color(0xff14131a),
@@ -101,7 +102,6 @@ class _ConfirmarNegociacaoState extends State<ConfirmarNegociacao> {
                         userId == widget.exemplarUsuarioId
                             ? 'negociar com você mesmo'
                             : 'confirmar a negociação?',
-                        //'confirmar a negociação?',
                         style: TextStyle(
                           fontFamily: 'Poppins',
                           color: const Color(0xff14131a),

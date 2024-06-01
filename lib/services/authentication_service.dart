@@ -131,4 +131,27 @@ class AuthenticationService {
       throw Exception('Erro ao alterar senha');
     }
   }
+
+  // Método para deletar a conta do usuário
+  Future<void> deleteUserAccount() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final userId = prefs.getString('userId');
+    //final token = prefs.getString('token');
+
+    final url = Uri.parse('${dotenv.env['BASE_API_URL']}users/$userId');
+
+    final response = await http.delete(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        //'Authorization': 'Bearer $token',
+      },
+    );
+
+    if (response.statusCode != 204) {
+      throw Exception('Erro ao deletar conta');
+    } else {
+      logoutUser();
+    }
+  }
 }

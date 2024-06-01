@@ -1,8 +1,9 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:projeto_pagina/services/authentication_service.dart';
 import 'package:projeto_pagina/telas/cadastro.dart';
 import 'package:projeto_pagina/telas/consulta_termos_uso.dart';
-import 'package:projeto_pagina/telas/esqueci_a_senha.dart';
 import 'package:projeto_pagina/telas/home.dart';
 
 class Login extends StatefulWidget {
@@ -156,33 +157,11 @@ class _LoginState extends State<Login> {
 
                 SizedBox(height: screenHeight * 0.02),
 
-                // Esqueci minha senha
-                GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const EsqueciSenha()),
-                    );
-                  },
-                  child: Text(
-                    "Esqueci minha senha",
-                    style: TextStyle(
-                      color: const Color(0xff1f1d34),
-                      fontSize: responsiveFontSize(12.0),
-                      fontFamily: 'Poppins',
-                      decoration: TextDecoration.underline,
-                    ),
-                  ),
-                ),
-                SizedBox(height: screenHeight * 0.02),
-
                 // Botão de entrar
                 ElevatedButton(
                   onPressed: () async {
                     bool loginSuccess = await _handleLogin();
-                    // Condição temporária só para conseguir mudar de tela
-                    //bool loginSuccess = true;
+
                     if (loginSuccess && mounted) {
                       Navigator.pushReplacement(
                         context,

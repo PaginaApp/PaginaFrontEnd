@@ -1,11 +1,18 @@
+// ignore_for_file: use_build_context_synchronously
+
+import 'package:diacritic/diacritic.dart';
 import 'package:flutter/material.dart';
+import 'package:projeto_pagina/data/models/dados_pessoais_model.dart';
 import 'package:projeto_pagina/data/models/exemplar_detalhes_model.dart';
+import 'package:projeto_pagina/services/dados_pessoais_service.dart';
 import 'package:projeto_pagina/services/exemplar_detalhes_service.dart';
 import 'package:projeto_pagina/services/transacao_service.dart';
 import 'package:projeto_pagina/telas/configuracoes_lista_de_desejos.dart';
+import 'package:projeto_pagina/telas/home.dart';
 
 class Produto2 extends StatefulWidget {
   final String exemplarId;
+  final String transacaoLeitorId;
   final String tipoTransacao;
   final String statusTransacao;
   final String transacaoId;
@@ -13,6 +20,7 @@ class Produto2 extends StatefulWidget {
   const Produto2({
     Key? key,
     required this.exemplarId,
+    required this.transacaoLeitorId,
     required this.tipoTransacao,
     required this.statusTransacao,
     required this.transacaoId,
@@ -25,11 +33,12 @@ class Produto2 extends StatefulWidget {
 class _Produto2State extends State<Produto2> {
   final ExemplarDetalhesService _exemplarService = ExemplarDetalhesService();
   late Future<ExemplarDetalhesModel> _exemplarDetalhesFuture;
+  late Future<DadosPessoaisModel> _dadosPessoaisFuture;
 
   final _controller = PageController();
 
   String selectedText = 'Total';
-  List<bool> isSelected = [false, false, false];
+  List<bool> isSelected = [false, false, false, false];
 
   @override
   void initState() {
@@ -37,6 +46,8 @@ class _Produto2State extends State<Produto2> {
 
     _exemplarDetalhesFuture =
         _exemplarService.fetchExemplarDetalhes(widget.exemplarId);
+    _dadosPessoaisFuture =
+        DadosPessoaisService().fetchDadosPessoais(widget.transacaoLeitorId);
   }
 
   @override
@@ -56,7 +67,7 @@ class _Produto2State extends State<Produto2> {
             AppBar(
               backgroundColor: const Color(0xfff6f5f2),
               title: Text(
-                'Livro',
+                'Livro anunciado',
                 style: TextStyle(
                   fontFamily: 'Poppins',
                   fontSize: responsiveFontSize(18),
@@ -271,7 +282,6 @@ class _Produto2State extends State<Produto2> {
                             horizontal: screenWidth * 0.05),
                         child: Align(
                           alignment: Alignment.centerLeft,
-                          // Trocar pela sinopse do livro quando a API estiver pronta
                           child: Text(
                             exemplar.sinopse,
                             style: TextStyle(
@@ -371,9 +381,11 @@ class _Produto2State extends State<Produto2> {
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
                           for (int i = 0; i < isSelected.length; i++)
-                            if (widget.tipoTransacao == 'Emprestimo' && i == 0)
+                            if (removeDiacritics(widget.tipoTransacao) ==
+                                    'Emprestimo' &&
+                                i == 0)
                               _buildCircle(
-                                  'Emprestimo',
+                                  'Empréstimo',
                                   i,
                                   exemplar.prazo == null
                                       ? 'Indefinido'
@@ -388,47 +400,236 @@ class _Produto2State extends State<Produto2> {
                                     ? '0'
                                     : exemplar.preco.toString(),
                               )
+                            else if (widget.tipoTransacao == 'Doação' && i == 3)
+                              _buildCircle('Doação', i, ''),
                         ],
                       ),
                       SizedBox(height: screenHeight * 0.05),
+                      Padding(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: screenWidth * 0.05),
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            'Negociação com:',
+                            style: TextStyle(
+                              fontFamily: 'Poppins',
+                              fontSize: responsiveFontSize(16),
+                              color: const Color(0xff14131a),
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: screenHeight * 0.02),
+                      Padding(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: screenWidth * 0.05),
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: FutureBuilder<DadosPessoaisModel>(
+                            future: _dadosPessoaisFuture,
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return const Center(
+                                    child: CircularProgressIndicator());
+                              } else if (snapshot.hasError) {
+                                return Center(
+                                  child: SizedBox(
+                                    height: screenHeight * 0.2,
+                                    width: screenWidth * 2,
+                                    child: Text(
+                                      'Erro ao carregar nome de usuário e título',
+                                      style: TextStyle(
+                                          fontFamily: 'Poppins',
+                                          fontSize: responsiveFontSize(14),
+                                          color: const Color(0xfff6f5f2),
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
+                                );
+                              } else {
+                                final solicitante = snapshot.data!;
+                                return Container(
+                                  padding: EdgeInsets.all(screenWidth * 0.02),
+                                  color: const Color(0xffbabdd3),
+                                  // ignore: sized_box_for_whitespace
+                                  child: Container(
+                                    height: screenHeight * 0.2,
+                                    width: screenWidth * 2,
+                                    child: Row(
+                                      children: [
+                                        FutureBuilder<Image>(
+                                          future: DadosPessoaisService()
+                                              .fetchAvatar(
+                                                  widget.transacaoLeitorId),
+                                          builder: (context, snapshot) {
+                                            if (snapshot.connectionState ==
+                                                ConnectionState.waiting) {
+                                              return const Center(
+                                                  child:
+                                                      CircularProgressIndicator());
+                                            } else if (snapshot.hasError) {
+                                              return Center(
+                                                child: Text(
+                                                  'Erro ao carregar imagem',
+                                                  style: TextStyle(
+                                                    color:
+                                                        const Color(0xfff6f5f2),
+                                                    fontFamily: 'Poppins',
+                                                    fontSize:
+                                                        responsiveFontSize(14),
+                                                  ),
+                                                ),
+                                              );
+                                            } else {
+                                              final image = snapshot.data!;
+                                              return CircleAvatar(
+                                                radius: screenWidth * 0.05,
+                                                backgroundColor:
+                                                    const Color(0xfff6f5f2),
+                                                child: image,
+                                              );
+                                            }
+                                          },
+                                        ),
+                                        SizedBox(width: screenWidth * 0.02),
+                                        Flexible(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                solicitante.nome,
+                                                style: TextStyle(
+                                                  fontSize:
+                                                      responsiveFontSize(14.0),
+                                                  fontFamily: 'Poppins',
+                                                  fontWeight: FontWeight.bold,
+                                                  color:
+                                                      const Color(0xff14131a),
+                                                ),
+                                              ),
+                                              SizedBox(
+                                                  height: screenHeight * 0.02),
+                                              Row(
+                                                children: [
+                                                  Icon(
+                                                    Icons.phone,
+                                                    color:
+                                                        const Color(0xfff6f5f2),
+                                                    size: responsiveFontSize(
+                                                        20.0),
+                                                  ),
+                                                  SizedBox(
+                                                      width:
+                                                          screenWidth * 0.01),
+                                                  Flexible(
+                                                    child: Text(
+                                                      solicitante.telefone,
+                                                      style: TextStyle(
+                                                        fontSize:
+                                                            responsiveFontSize(
+                                                                12.0),
+                                                        fontFamily: 'Poppins',
+                                                        color: const Color(
+                                                            0xff14131a),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                              SizedBox(
+                                                  height: screenHeight * 0.005),
+                                              Row(
+                                                children: [
+                                                  Icon(
+                                                    Icons.email,
+                                                    color:
+                                                        const Color(0xfff6f5f2),
+                                                    size: responsiveFontSize(
+                                                        20.0),
+                                                  ),
+                                                  SizedBox(
+                                                      width:
+                                                          screenWidth * 0.01),
+                                                  Flexible(
+                                                    child: Text(
+                                                      solicitante.email,
+                                                      style: TextStyle(
+                                                        fontSize:
+                                                            responsiveFontSize(
+                                                                12.0),
+                                                        fontFamily: 'Poppins',
+                                                        color: const Color(
+                                                            0xff14131a),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              }
+                            },
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: screenHeight * 0.02),
                       ElevatedButton(
-                        onPressed: () async {
-                          bool success = await _handleAceitarNegociacao();
+                        onPressed: widget.statusTransacao == 'Cancelada' ||
+                                widget.statusTransacao == 'Concluída'
+                            ? null
+                            : () async {
+                                bool success = await _handleAceitarNegociacao();
 
-                          if (success && mounted) {
-                            Navigator.pop(context);
-                            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                                if (success && mounted) {
+                                  Navigator.pushAndRemoveUntil(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => const Home(),
+                                      ),
+                                      (route) => false);
+                                  ScaffoldMessenger.of(context)
+                                      .hideCurrentSnackBar();
 
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  'Negociação aceita com sucesso!',
-                                  style: TextStyle(
-                                    fontFamily: 'Poppins',
-                                    fontSize: responsiveFontSize(16.0),
-                                  ),
-                                ),
-                                duration: const Duration(seconds: 5),
-                                backgroundColor: const Color(0xff4ecd72),
-                              ),
-                            );
-                          } else if (mounted) {
-                            ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  'Erro ao aceitar negociação!',
-                                  style: TextStyle(
-                                    fontFamily: 'Poppins',
-                                    fontSize: responsiveFontSize(16.0),
-                                  ),
-                                ),
-                                duration: const Duration(seconds: 5),
-                                backgroundColor: const Color(0xffec4e4e),
-                              ),
-                            );
-                          }
-                        },
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        'Negociação aceita com sucesso!',
+                                        style: TextStyle(
+                                          fontFamily: 'Poppins',
+                                          fontSize: responsiveFontSize(16.0),
+                                        ),
+                                      ),
+                                      duration: const Duration(seconds: 5),
+                                      backgroundColor: const Color(0xff4ecd72),
+                                    ),
+                                  );
+                                } else if (mounted) {
+                                  ScaffoldMessenger.of(context)
+                                      .hideCurrentSnackBar();
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        'Erro ao aceitar negociação!',
+                                        style: TextStyle(
+                                          fontFamily: 'Poppins',
+                                          fontSize: responsiveFontSize(16.0),
+                                        ),
+                                      ),
+                                      duration: const Duration(seconds: 5),
+                                      backgroundColor: const Color(0xffec4e4e),
+                                    ),
+                                  );
+                                }
+                              },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xff4e90cd),
                           foregroundColor: const Color(0xfff6f5f2),
@@ -437,7 +638,13 @@ class _Produto2State extends State<Produto2> {
                           ),
                         ),
                         child: Text(
-                          "Aceitar negociação",
+                          widget.statusTransacao == 'Cancelada'
+                              ? 'Negociação cancelada'
+                              : widget.statusTransacao == 'Concluída'
+                                  ? 'Negociação concluída'
+                                  : widget.statusTransacao == 'Em espera'
+                                      ? 'Aceitar negociação'
+                                      : 'Negociação em andamento',
                           style: TextStyle(
                             fontSize: responsiveFontSize(16.0),
                             fontFamily: 'Poppins',
@@ -469,6 +676,7 @@ class _Produto2State extends State<Produto2> {
       'Empréstimo': 'assets/png/emprestimo.png',
       'Troca': 'assets/png/troca.png',
       'Venda': 'assets/png/venda.png',
+      'Doação': 'assets/png/doacao.png',
     };
     return Column(
       children: [
@@ -476,7 +684,6 @@ class _Produto2State extends State<Produto2> {
           borderWidth: 0.0,
           isSelected: [isSelected[index]],
           onPressed: (int newIndex) {
-            // também preciso adicionar a lógica de negociação
             setState(() {
               for (int i = 0; i < isSelected.length; i++) {
                 if (i == index) {
@@ -547,6 +754,15 @@ class _Produto2State extends State<Produto2> {
         if (text == 'Venda')
           Text(
             'R\$ $attribute',
+            style: TextStyle(
+              color: const Color(0xff4e90cd),
+              fontFamily: 'Poppins',
+              fontSize: responsiveFontSize(11.0),
+            ),
+          ),
+        if (text == 'Doação')
+          Text(
+            'Sem custo',
             style: TextStyle(
               color: const Color(0xff4e90cd),
               fontFamily: 'Poppins',

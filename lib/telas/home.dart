@@ -1,14 +1,16 @@
+// ignore_for_file: use_build_context_synchronously
+
+import 'package:diacritic/diacritic.dart';
 import 'package:flutter/material.dart';
 import 'package:projeto_pagina/data/models/exemplar_detalhes_model.dart';
 import 'package:projeto_pagina/data/repositories/exemplar_repository.dart';
-import 'package:projeto_pagina/data/repositories/produto_repository.dart';
 import 'package:projeto_pagina/services/exemplar_detalhes_service.dart';
 import 'package:projeto_pagina/stores/exemplar_store.dart';
-import 'package:projeto_pagina/stores/produto_store.dart';
 import 'package:projeto_pagina/telas/configuracoes.dart';
 import 'package:projeto_pagina/telas/home_categorias.dart';
 import 'package:projeto_pagina/telas/produto.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -79,11 +81,6 @@ class _HomeState extends State<Home> {
                           String? userId = prefs.getString('userId');
                           String? token = prefs.getString('token');
 
-                          print("user id pego no shared preferences");
-                          print(userId);
-                          print("token pego no shared preferences");
-                          print(token);
-
                           if (mounted) {
                             Navigator.push(
                               context,
@@ -106,7 +103,6 @@ class _HomeState extends State<Home> {
                             Icons.person,
                             color: Color(0xff4e90cd),
                           ),
-                          //backgroundImage: NetworkImage('urlDaImagem'), //URL da imagem
                         ),
                       ),
                     ),
@@ -143,7 +139,6 @@ class _HomeState extends State<Home> {
           ),
           // Parte branca
           Expanded(
-            // PAREI AQUI
             child: Container(
               color: const Color(0xfff6f5f2),
               child: Column(
@@ -204,8 +199,7 @@ class _HomeState extends State<Home> {
                       } else {
                         return Expanded(
                           child: ListView.builder(
-                            itemCount: exemplarStore.state.value
-                                .length, // trocar por items.length quando a API estiver pronta
+                            itemCount: exemplarStore.state.value.length,
                             itemBuilder: (context, index) {
                               final exemplar = exemplarStore.state.value[index];
                               return InkWell(
@@ -217,11 +211,6 @@ class _HomeState extends State<Home> {
                                           Produto(exemplarId: exemplar.id),
                                     ),
                                   );
-                                  //exemplarStore.getExemplares(1, 10);
-                                  print(exemplar.id);
-                                  print(exemplar.descricao);
-
-                                  //print(produtoStore.state.value.length);
                                 },
                                 child: FutureBuilder<ExemplarDetalhesModel>(
                                   future: ExemplarDetalhesService()
@@ -267,9 +256,11 @@ class _HomeState extends State<Home> {
                                         ),
                                         child: Row(
                                           children: [
-                                            Image.asset(
-                                              'assets/png/emprestimo.png', // Trocar pela URL da imagem do livro quando a API estiver pronta
-                                              width: screenWidth * 0.3,
+                                            Image.network(
+                                              dotenv.env['BASE_API_URL']! +
+                                                  dotenv
+                                                      .env['IMAGEM_EXEMPLAR']!,
+                                              width: screenWidth * 0.15,
                                               height: screenHeight * 0.1,
                                             ),
                                             SizedBox(
@@ -280,8 +271,7 @@ class _HomeState extends State<Home> {
                                                     CrossAxisAlignment.start,
                                                 children: [
                                                   Text(
-                                                    exemplarDetalhes
-                                                        .titulo, // Trocar pelo nome do livro quando a API estiver pronta
+                                                    exemplarDetalhes.titulo,
                                                     style: TextStyle(
                                                       fontFamily: 'Poppins',
                                                       fontSize:
@@ -299,7 +289,6 @@ class _HomeState extends State<Home> {
                                                         Axis.horizontal,
                                                     child: Row(
                                                       children: [
-                                                        // Trocar pelo nome das categorias quando a API estiver pronta
                                                         for (var categoria
                                                             in exemplarDetalhes
                                                                 .categorias)
@@ -311,10 +300,29 @@ class _HomeState extends State<Home> {
                                                   SizedBox(
                                                       height:
                                                           screenHeight * 0.01),
-                                                  Image.asset(
-                                                    'assets/png/doacao.png', // Trocar pela URL da imagem de doação, empréstimo, troca ou venda
-                                                    width: screenWidth * 0.1,
-                                                    height: screenHeight * 0.05,
+                                                  SingleChildScrollView(
+                                                    scrollDirection:
+                                                        Axis.horizontal,
+                                                    child: Row(
+                                                      children: [
+                                                        for (var tipoTransacao
+                                                            in exemplarDetalhes
+                                                                .tiposTransacoes) ...[
+                                                          Image.asset(
+                                                            'assets/png/${removeDiacritics(tipoTransacao).toLowerCase()}.png',
+                                                            width: screenWidth *
+                                                                0.1,
+                                                            height:
+                                                                screenHeight *
+                                                                    0.05,
+                                                          ),
+                                                          SizedBox(
+                                                              width:
+                                                                  screenWidth *
+                                                                      0.015),
+                                                        ]
+                                                      ],
+                                                    ),
                                                   ),
                                                 ],
                                               ),

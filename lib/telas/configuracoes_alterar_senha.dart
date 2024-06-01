@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:projeto_pagina/services/authentication_service.dart';
 
@@ -276,15 +278,6 @@ class _ConfiguracoesAlterarSenhaState extends State<ConfiguracoesAlterarSenha> {
                             ),
                           ],
                         ),
-                        // ElevatedButton(
-                        //   onPressed: () {
-                        //     // if (_formKey.currentState?.validate() ?? false) {
-                        //     //   Navigator.push(
-                        //     //     context,
-                        //     //     MaterialPageRoute(
-                        //     //         builder: (context) => const Cadastro1()),
-                        //     //   );
-                        //     // }
                       ],
                     ),
                   ],

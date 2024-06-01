@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:projeto_pagina/data/models/estado_capa_model.dart';
 import 'package:projeto_pagina/data/models/estado_paginas_model.dart';
@@ -393,7 +395,6 @@ class _ConfiguracoesAcervoCadastrosAtualizarState
 
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      // exemplo de estado de conservação
                       children: [
                         _buildCoverState("Ótimo estado", 0, coverStateId1),
                         _buildCoverState("Estado regular", 1, coverStateId2),
@@ -523,7 +524,6 @@ class _ConfiguracoesAcervoCadastrosAtualizarState
                                       controller: daysController,
                                       enabled: isLoanSelected,
                                       keyboardType: TextInputType.number,
-                                      //validator: _validateRequiredField,
                                       decoration: InputDecoration(
                                         hintText: '00',
                                         contentPadding: EdgeInsets.symmetric(

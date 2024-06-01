@@ -1,3 +1,4 @@
+import 'package:diacritic/diacritic.dart';
 import 'package:flutter/material.dart';
 import 'package:projeto_pagina/data/models/exemplar_detalhes_model.dart';
 import 'package:projeto_pagina/data/repositories/exemplar_repository.dart';
@@ -14,6 +15,7 @@ import 'package:projeto_pagina/telas/configuracoes_acervo_cadastros_excluir.dart
 import 'package:projeto_pagina/telas/configuracoes_acervo_cadastros_solicitacoes.dart';
 import 'package:projeto_pagina/telas/produto_1.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ConfiguracoesAcervoCadastros extends StatefulWidget {
   const ConfiguracoesAcervoCadastros({super.key});
@@ -41,7 +43,7 @@ class _ConfiguracoesAcervoCadastrosState
     SharedPreferences.getInstance().then((prefs) {
       String? id = prefs.getString('userId');
       if (id != null) {
-        exemplarStore.getExemplaresByUser(id, 1, 10);
+        exemplarStore.getExemplaresByUser(id, 1, 50);
         transacaoAnuncianteStore.getTransacoesAnuncianteById(id);
         transacaoLeitorStore.getTransacoesLeitorById(id);
       }
@@ -78,44 +80,7 @@ class _ConfiguracoesAcervoCadastrosState
                 color: Color(0xff4e90cd),
               ),
             ),
-            Row(
-              children: [
-                Expanded(
-                  child: Padding(
-                    padding: EdgeInsets.all(screenWidth * 0.07),
-                    child: TextField(
-                      decoration: InputDecoration(
-                        hintText: 'Título, autor, editora...',
-                        hintStyle: TextStyle(
-                          fontFamily: 'Poppins',
-                          fontSize: responsiveFontSize(14.0),
-                          color: const Color(0xff14131a),
-                        ),
-                        fillColor: const Color(0xfff6f5f2),
-                        filled: true,
-                        prefixIcon: Icon(
-                          Icons.search,
-                          color: const Color(0xff14131a),
-                          size: responsiveFontSize(22.0),
-                        ),
-                        enabledBorder: const OutlineInputBorder(
-                          borderSide: BorderSide(color: Color(0xff4e90cd)),
-                          borderRadius: BorderRadius.all(
-                            Radius.circular(8.0),
-                          ),
-                        ),
-                        focusedBorder: const OutlineInputBorder(
-                          borderSide: BorderSide(color: Color(0xff4e90cd)),
-                          borderRadius: BorderRadius.all(
-                            Radius.circular(8.0),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
+            SizedBox(height: screenHeight * 0.05),
             TabBar(
               indicatorColor: const Color(0xff14131a),
               unselectedLabelColor: const Color(0xff4f5071),
@@ -288,10 +253,13 @@ class _ConfiguracoesAcervoCadastrosState
                                                   children: [
                                                     Stack(
                                                       children: [
-                                                        Image.asset(
-                                                          'assets/png/emprestimo.png',
-                                                          width:
-                                                              screenWidth * 0.3,
+                                                        Image.network(
+                                                          dotenv.env[
+                                                                  'BASE_API_URL']! +
+                                                              dotenv.env[
+                                                                  'IMAGEM_EXEMPLAR']!,
+                                                          width: screenWidth *
+                                                              0.15,
                                                           height: screenHeight *
                                                               0.1,
                                                         ),
@@ -350,13 +318,29 @@ class _ConfiguracoesAcervoCadastrosState
                                                               height:
                                                                   screenHeight *
                                                                       0.01),
-                                                          Image.asset(
-                                                            'assets/png/doacao.png',
-                                                            width: screenWidth *
-                                                                0.1,
-                                                            height:
-                                                                screenHeight *
-                                                                    0.05,
+                                                          SingleChildScrollView(
+                                                            scrollDirection:
+                                                                Axis.horizontal,
+                                                            child: Row(
+                                                              children: [
+                                                                for (var tipoTransacao
+                                                                    in exemplarDetalhes
+                                                                        .tiposTransacoes) ...[
+                                                                  Image.asset(
+                                                                    'assets/png/${removeDiacritics(tipoTransacao).toLowerCase()}.png',
+                                                                    width:
+                                                                        screenWidth *
+                                                                            0.1,
+                                                                    height:
+                                                                        screenHeight *
+                                                                            0.05,
+                                                                  ),
+                                                                  SizedBox(
+                                                                      width: screenWidth *
+                                                                          0.015),
+                                                                ]
+                                                              ],
+                                                            ),
                                                           ),
                                                         ],
                                                       ),

@@ -23,7 +23,7 @@ class EstadoPaginasService {
         throw Exception('Formato de resposta inesperado');
       }
     } else {
-      throw Exception('Falha ao carregar estado_paginas');
+      throw Exception('Falha ao carregar estados das páginas');
     }
   }
 }

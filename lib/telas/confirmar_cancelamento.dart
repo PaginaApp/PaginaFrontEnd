@@ -1,23 +1,20 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:flutter/material.dart';
-import 'package:projeto_pagina/data/repositories/exemplar_repository.dart';
-import 'package:projeto_pagina/telas/configuracoes_acervo_cadastros.dart';
+import 'package:projeto_pagina/services/transacao_service.dart';
+import 'package:projeto_pagina/telas/home.dart';
 
-class ConfiguracoesAcervoCadastrosExcluir extends StatefulWidget {
-  final String exemplarId;
+class ConfirmarCancelamento extends StatefulWidget {
+  final String transacaoId;
 
-  const ConfiguracoesAcervoCadastrosExcluir(
-      {Key? key, required this.exemplarId})
+  const ConfirmarCancelamento({Key? key, required this.transacaoId})
       : super(key: key);
 
   @override
-  State<ConfiguracoesAcervoCadastrosExcluir> createState() =>
-      _ConfiguracoesAcervoCadastrosExcluirState();
+  State<ConfirmarCancelamento> createState() => _ConfirmarCancelamentoState();
 }
 
-class _ConfiguracoesAcervoCadastrosExcluirState
-    extends State<ConfiguracoesAcervoCadastrosExcluir> {
+class _ConfirmarCancelamentoState extends State<ConfirmarCancelamento> {
   @override
   Widget build(BuildContext context) {
     double screenHeight = MediaQuery.of(context).size.height;
@@ -63,7 +60,15 @@ class _ConfiguracoesAcervoCadastrosExcluirState
                       ),
                       SizedBox(height: screenHeight * 0.015),
                       Text(
-                        'Esse exemplar será excluído',
+                        'Você cancelará',
+                        style: TextStyle(
+                          fontFamily: 'Poppins',
+                          color: const Color(0xff14131a),
+                          fontSize: responsiveFontSize(14.0),
+                        ),
+                      ),
+                      Text(
+                        'a negociação',
                         style: TextStyle(
                           fontFamily: 'Poppins',
                           color: const Color(0xff14131a),
@@ -98,7 +103,7 @@ class _ConfiguracoesAcervoCadastrosExcluirState
                               ),
                             ),
                             child: Text(
-                              "Cancelar",
+                              "Voltar",
                               style: TextStyle(
                                 fontFamily: 'Poppins',
                                 fontSize: responsiveFontSize(16.0),
@@ -108,15 +113,23 @@ class _ConfiguracoesAcervoCadastrosExcluirState
                           ),
                           ElevatedButton(
                             onPressed: () async {
-                              bool success = await _handleDeleteExemplar();
+                              bool success = await _handleCancelarTransacao();
+
                               if (success && mounted) {
+                                Navigator.pushAndRemoveUntil(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => const Home()),
+                                  (Route<dynamic> route) => false,
+                                );
+
                                 ScaffoldMessenger.of(context)
                                     .hideCurrentSnackBar();
 
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
                                     content: Text(
-                                      'Exemplar deletado com sucesso!',
+                                      'Cancelamento efetuado com sucesso!',
                                       style: TextStyle(
                                         fontFamily: 'Poppins',
                                         fontSize: responsiveFontSize(16.0),
@@ -126,27 +139,20 @@ class _ConfiguracoesAcervoCadastrosExcluirState
                                     backgroundColor: const Color(0xff4ecd72),
                                   ),
                                 );
-                                Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (BuildContext context) =>
-                                        const ConfiguracoesAcervoCadastros(),
-                                  ),
-                                );
                               } else if (mounted) {
                                 ScaffoldMessenger.of(context)
                                     .hideCurrentSnackBar();
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
                                     content: Text(
-                                      'Algo deu errado, tente novamente!',
+                                      'Erro ao cancelar a transação. Tente novamente mais tarde',
                                       style: TextStyle(
                                         fontFamily: 'Poppins',
                                         fontSize: responsiveFontSize(16.0),
                                       ),
                                     ),
                                     duration: const Duration(seconds: 5),
-                                    backgroundColor: const Color(0xffcd4e4e),
+                                    backgroundColor: const Color(0xffec4e4e),
                                   ),
                                 );
                               }
@@ -179,9 +185,9 @@ class _ConfiguracoesAcervoCadastrosExcluirState
     );
   }
 
-  Future<bool> _handleDeleteExemplar() async {
+  Future<bool> _handleCancelarTransacao() async {
     try {
-      await ExemplarRepository().deleteExemplar(widget.exemplarId);
+      await TransacaoService().cancelarTransacao(widget.transacaoId);
       return true;
     } catch (e) {
       return false;

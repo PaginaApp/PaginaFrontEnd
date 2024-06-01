@@ -1,9 +1,12 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:projeto_pagina/data/repositories/desejo_repository.dart';
 import 'package:projeto_pagina/data/repositories/produto_repository.dart';
 import 'package:projeto_pagina/stores/desejo_store.dart';
 import 'package:projeto_pagina/stores/produto_store.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ConfiguracoesListaDeDesejos1 extends StatefulWidget {
   const ConfiguracoesListaDeDesejos1({super.key});
@@ -117,7 +120,7 @@ class _ConfiguracoesListaDeDesejos1State
                       }
                     },
                     decoration: InputDecoration(
-                      hintText: 'Pesquise por título, autor, editora...',
+                      hintText: 'Pesquise por título ou ISBN',
                       hintStyle: TextStyle(
                         color: const Color(0xff14131a),
                         fontFamily: 'Poppins',
@@ -195,15 +198,11 @@ class _ConfiguracoesListaDeDesejos1State
                       children: [
                         Expanded(
                           child: ListView.builder(
-                            itemCount: produtoStore.state.value
-                                .length, // trocar por items.length quando a API estiver pronta
+                            itemCount: produtoStore.state.value.length,
                             itemBuilder: (context, index) {
                               final livro = produtoStore.state.value[index];
                               return InkWell(
-                                onTap: () {
-                                  print(
-                                      'Caixa $index clicadaaaa'); // Trocar pela ação ao clicar
-                                },
+                                onTap: () {},
                                 child: Container(
                                   margin: EdgeInsets.all(screenWidth * 0.05),
                                   padding: EdgeInsets.all(screenWidth * 0.02),
@@ -221,9 +220,10 @@ class _ConfiguracoesListaDeDesejos1State
                                   ),
                                   child: Row(
                                     children: [
-                                      Image.asset(
-                                        'assets/png/emprestimo.png', // Trocar pela URL da imagem do livro quando a API estiver pronta
-                                        width: screenWidth * 0.3,
+                                      Image.network(
+                                        dotenv.env['BASE_API_URL']! +
+                                            dotenv.env['IMAGEM_EXEMPLAR']!,
+                                        width: screenWidth * 0.15,
                                         height: screenHeight * 0.1,
                                       ),
                                       SizedBox(width: screenWidth * 0.002),
@@ -244,29 +244,18 @@ class _ConfiguracoesListaDeDesejos1State
                                             ),
                                             SizedBox(
                                                 height: screenHeight * 0.005),
-                                            // SingleChildScrollView(
-                                            //   scrollDirection: Axis.horizontal,
-                                            //   child: Row(
-                                            //     children: [
-                                            //       //Trocar pelo nome das categorias quando a API estiver pronta
-                                            //       _buildCategory('Aventura'),
-                                            //       _buildCategory('Biografia'),
-                                            //     ],
-                                            //   ),
-                                            // ),
+                                            SingleChildScrollView(
+                                              scrollDirection: Axis.horizontal,
+                                              child: Row(
+                                                children: [
+                                                  for (var categoria
+                                                      in livro.categorias)
+                                                    _buildCategory(categoria),
+                                                ],
+                                              ),
+                                            ),
                                             SizedBox(
                                                 height: screenHeight * 0.01),
-                                            Row(
-                                              children: [
-                                                Image.asset(
-                                                  // Trocar pela URL da imagem de doação, empréstimo, troca ou venda
-                                                  // Vou precisar fazer algo para adicionar mais imagens
-                                                  'assets/png/doacao.png',
-                                                  width: screenWidth * 0.1,
-                                                  height: screenHeight * 0.05,
-                                                ),
-                                              ],
-                                            )
                                           ],
                                         ),
                                       ),
@@ -375,5 +364,30 @@ class _ConfiguracoesListaDeDesejos1State
     } catch (e) {
       return false;
     }
+  }
+
+  Widget _buildCategory(String text) {
+    double screenWidth = MediaQuery.of(context).size.width;
+
+    double responsiveFontSize(double fontSize) {
+      return fontSize * screenWidth / 375.0;
+    }
+
+    return Container(
+      margin: EdgeInsets.only(right: screenWidth * 0.015),
+      padding: EdgeInsets.all(screenWidth * 0.014),
+      decoration: BoxDecoration(
+        color: const Color(0xffbabdd3),
+        borderRadius: BorderRadius.circular(20.0),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          fontFamily: 'Poppins',
+          fontSize: responsiveFontSize(11.0),
+          color: const Color(0xff14131a),
+        ),
+      ),
+    );
   }
 }

@@ -1,3 +1,4 @@
+import 'package:diacritic/diacritic.dart';
 import 'package:flutter/material.dart';
 import 'package:projeto_pagina/data/models/exemplar_detalhes_model.dart';
 import 'package:projeto_pagina/data/repositories/exemplar_repository.dart';
@@ -8,6 +9,7 @@ import 'package:projeto_pagina/stores/transacao_leitor_store.dart';
 import 'package:projeto_pagina/telas/produto_3.dart';
 import 'package:projeto_pagina/telas/produto_negociacao_negociacoes.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ConfiguracoesAcervoCadastrosSolicitacoes extends StatefulWidget {
   const ConfiguracoesAcervoCadastrosSolicitacoes({super.key});
@@ -148,6 +150,8 @@ class _ConfiguracoesAcervoCadastrosSolicitacoesState
                                       MaterialPageRoute(
                                         builder: (context) => Produto3(
                                           exemplarId: exemplarDetalhes.id,
+                                          transacaoAnuncianteId:
+                                              transacao.usuAnuncianteId,
                                           tipoTransacao:
                                               transacao.tipoTransacao,
                                           statusTransacao:
@@ -163,8 +167,11 @@ class _ConfiguracoesAcervoCadastrosSolicitacoesState
                                         builder: (context) =>
                                             ProdutoNegociacaoNegociacoes(
                                           exemplarId: exemplarDetalhes.id,
+                                          transacaoLeitorId:
+                                              transacao.usuLeitorId,
                                           tipoTransacao:
                                               transacao.tipoTransacao,
+                                          transacaoId: transacao.id,
                                         ),
                                       ),
                                     );
@@ -191,9 +198,11 @@ class _ConfiguracoesAcervoCadastrosSolicitacoesState
                                       children: [
                                         Stack(
                                           children: [
-                                            Image.asset(
-                                              'assets/png/emprestimo.png',
-                                              width: screenWidth * 0.3,
+                                            Image.network(
+                                              dotenv.env['BASE_API_URL']! +
+                                                  dotenv
+                                                      .env['IMAGEM_EXEMPLAR']!,
+                                              width: screenWidth * 0.15,
                                               height: screenHeight * 0.1,
                                             ),
                                             if (isLocked)
@@ -210,16 +219,6 @@ class _ConfiguracoesAcervoCadastrosSolicitacoesState
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.start,
                                             children: [
-                                              Text(
-                                                "Você solicitou:",
-                                                style: TextStyle(
-                                                  fontFamily: 'Poppins',
-                                                  fontSize:
-                                                      responsiveFontSize(14.0),
-                                                  color:
-                                                      const Color(0xff14131a),
-                                                ),
-                                              ),
                                               Text(
                                                 exemplarDetalhes.titulo,
                                                 style: TextStyle(
@@ -247,8 +246,35 @@ class _ConfiguracoesAcervoCadastrosSolicitacoesState
                                               ),
                                               SizedBox(
                                                   height: screenHeight * 0.01),
+                                              Text(
+                                                "Status da negociação: ${transacao.statusTransacao}",
+                                                style: TextStyle(
+                                                  fontFamily: 'Poppins',
+                                                  fontSize:
+                                                      responsiveFontSize(13.0),
+                                                  color:
+                                                      const Color(0xff14131a),
+                                                ),
+                                              ),
+                                              SizedBox(
+                                                  height: screenHeight * 0.01),
+                                              Text(
+                                                transacao.statusTransacao ==
+                                                        'Em espera'
+                                                    ? 'Aguarde a confirmação do anunciante'
+                                                    : '',
+                                                style: TextStyle(
+                                                  color:
+                                                      const Color(0xff14131a),
+                                                  fontSize:
+                                                      responsiveFontSize(12.0),
+                                                  fontFamily: 'Poppins',
+                                                ),
+                                              ),
+                                              SizedBox(
+                                                  height: screenHeight * 0.01),
                                               Image.asset(
-                                                'assets/png/doacao.png',
+                                                'assets/png/${removeDiacritics(transacao.tipoTransacao).toLowerCase()}.png',
                                                 width: screenWidth * 0.1,
                                                 height: screenHeight * 0.05,
                                               ),

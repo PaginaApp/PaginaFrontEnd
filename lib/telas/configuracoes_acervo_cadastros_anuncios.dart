@@ -9,6 +9,7 @@ import 'package:projeto_pagina/telas/produto_2.dart';
 import 'package:projeto_pagina/telas/produto_negociacao_negociacoes.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:diacritic/diacritic.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ConfiguracoesAcervoCadastrosAnuncios extends StatefulWidget {
   const ConfiguracoesAcervoCadastrosAnuncios({super.key});
@@ -151,6 +152,8 @@ class _ConfiguracoesAcervoCadastrosAnunciosState
                                       MaterialPageRoute(
                                         builder: (context) => Produto2(
                                           exemplarId: exemplarDetalhes.id,
+                                          transacaoLeitorId:
+                                              transacao.usuLeitorId,
                                           tipoTransacao:
                                               transacao.tipoTransacao,
                                           statusTransacao:
@@ -166,8 +169,11 @@ class _ConfiguracoesAcervoCadastrosAnunciosState
                                         builder: (context) =>
                                             ProdutoNegociacaoNegociacoes(
                                           exemplarId: exemplarDetalhes.id,
+                                          transacaoLeitorId:
+                                              transacao.usuLeitorId,
                                           tipoTransacao:
                                               transacao.tipoTransacao,
+                                          transacaoId: transacao.id,
                                         ),
                                       ),
                                     );
@@ -194,9 +200,11 @@ class _ConfiguracoesAcervoCadastrosAnunciosState
                                       children: [
                                         Stack(
                                           children: [
-                                            Image.asset(
-                                              'assets/png/emprestimo.png',
-                                              width: screenWidth * 0.3,
+                                            Image.network(
+                                              dotenv.env['BASE_API_URL']! +
+                                                  dotenv
+                                                      .env['IMAGEM_EXEMPLAR']!,
+                                              width: screenWidth * 0.15,
                                               height: screenHeight * 0.1,
                                             ),
                                             if (isLocked)
@@ -256,7 +264,10 @@ class _ConfiguracoesAcervoCadastrosAnunciosState
                                                 transacao.statusTransacao ==
                                                         'Em espera'
                                                     ? 'Aceite a negociação'
-                                                    : '',
+                                                    : transacao.statusTransacao ==
+                                                            'Em andamento'
+                                                        ? 'Clique para concluir a negociação'
+                                                        : '',
                                                 style: TextStyle(
                                                   color:
                                                       const Color(0xff14131a),
@@ -269,7 +280,6 @@ class _ConfiguracoesAcervoCadastrosAnunciosState
                                                   height: screenHeight * 0.01),
                                               Image.asset(
                                                 'assets/png/${removeDiacritics(transacao.tipoTransacao).toLowerCase()}.png',
-                                                //'assets/png/emprestimo.png',
                                                 width: screenWidth * 0.1,
                                                 height: screenHeight * 0.05,
                                               ),

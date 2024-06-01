@@ -8,6 +8,7 @@ class ProdutoModel {
   final String autID;
   final String editora;
   final String ediID;
+  final List<String> categorias;
 
   ProdutoModel({
     required this.id,
@@ -19,6 +20,7 @@ class ProdutoModel {
     required this.autID,
     required this.editora,
     required this.ediID,
+    required this.categorias,
   });
 
   factory ProdutoModel.fromJson(Map<String, dynamic> json) {
@@ -32,6 +34,7 @@ class ProdutoModel {
       autID: json['autor']['aut_Id'],
       editora: json['editora']['edi_Nome'],
       ediID: json['editora']['edi_Id'],
+      categorias: [for (var item in json['categorias']) item['cat_Nome']],
     );
   }
 }
