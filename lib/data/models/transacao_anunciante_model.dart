@@ -9,6 +9,8 @@ class TransacaoAnuncianteModel {
   final String exemplaresId;
   final bool exemplarNegociando;
   final String exemplaresUsuarioId;
+  final String titulo;
+  final List<String> categorias;
 
   TransacaoAnuncianteModel({
     required this.id,
@@ -21,6 +23,8 @@ class TransacaoAnuncianteModel {
     required this.exemplaresId,
     required this.exemplarNegociando,
     required this.exemplaresUsuarioId,
+    required this.titulo,
+    required this.categorias,
   });
 
   factory TransacaoAnuncianteModel.fromJson(Map<String, dynamic> json) {
@@ -39,6 +43,11 @@ class TransacaoAnuncianteModel {
       exemplaresId: json['exemplares']['exe_Id'],
       exemplarNegociando: json['exemplares']['exe_Negociando'],
       exemplaresUsuarioId: json['exemplares']['exe_usu_id'],
+      titulo: json['exemplares']['livro']['liv_Titulo'],
+      categorias: [
+        for (var item in json['exemplares']['livro']['categorias'])
+          item['cat_Nome']
+      ],
     );
   }
 }

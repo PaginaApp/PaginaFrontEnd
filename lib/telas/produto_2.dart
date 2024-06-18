@@ -453,7 +453,7 @@ class _Produto2State extends State<Produto2> {
                                 final solicitante = snapshot.data!;
                                 return Container(
                                   padding: EdgeInsets.all(screenWidth * 0.02),
-                                  color: const Color(0xffbabdd3),
+                                  color: const Color(0xff4e90cd),
                                   // ignore: sized_box_for_whitespace
                                   child: Container(
                                     height: screenHeight * 0.2,
@@ -508,7 +508,7 @@ class _Produto2State extends State<Produto2> {
                                                   fontFamily: 'Poppins',
                                                   fontWeight: FontWeight.bold,
                                                   color:
-                                                      const Color(0xff14131a),
+                                                      const Color(0xfff6f5f2),
                                                 ),
                                               ),
                                               SizedBox(
@@ -534,7 +534,7 @@ class _Produto2State extends State<Produto2> {
                                                                 12.0),
                                                         fontFamily: 'Poppins',
                                                         color: const Color(
-                                                            0xff14131a),
+                                                            0xfff6f5f2),
                                                       ),
                                                     ),
                                                   ),
@@ -563,7 +563,7 @@ class _Produto2State extends State<Produto2> {
                                                                 12.0),
                                                         fontFamily: 'Poppins',
                                                         color: const Color(
-                                                            0xff14131a),
+                                                            0xfff6f5f2),
                                                       ),
                                                     ),
                                                   ),
@@ -784,15 +784,15 @@ class _Produto2State extends State<Produto2> {
       margin: EdgeInsets.only(right: screenWidth * 0.015),
       padding: EdgeInsets.all(screenWidth * 0.014),
       decoration: BoxDecoration(
-        color: const Color(0xffbabdd3),
+        color: const Color(0xff4e90cd),
         borderRadius: BorderRadius.circular(20.0),
       ),
       child: Text(
         text,
         style: TextStyle(
           fontFamily: 'Poppins',
-          fontSize: responsiveFontSize(11.0),
-          color: const Color(0xff14131a),
+          fontSize: responsiveFontSize(12.0),
+          color: const Color(0xfff6f5f2),
         ),
       ),
     );

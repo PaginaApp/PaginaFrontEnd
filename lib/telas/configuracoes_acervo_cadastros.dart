@@ -1,10 +1,8 @@
 import 'package:diacritic/diacritic.dart';
 import 'package:flutter/material.dart';
-import 'package:projeto_pagina/data/models/exemplar_detalhes_model.dart';
 import 'package:projeto_pagina/data/repositories/exemplar_repository.dart';
 import 'package:projeto_pagina/data/repositories/transacao_anunciante_repository.dart';
 import 'package:projeto_pagina/data/repositories/transacao_leitor_repository.dart';
-import 'package:projeto_pagina/services/exemplar_detalhes_service.dart';
 import 'package:projeto_pagina/stores/exemplar_store.dart';
 import 'package:projeto_pagina/stores/transacao_anunciante_store.dart';
 import 'package:projeto_pagina/stores/transacao_leitor_store.dart';
@@ -15,7 +13,6 @@ import 'package:projeto_pagina/telas/configuracoes_acervo_cadastros_excluir.dart
 import 'package:projeto_pagina/telas/configuracoes_acervo_cadastros_solicitacoes.dart';
 import 'package:projeto_pagina/telas/produto_1.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ConfiguracoesAcervoCadastros extends StatefulWidget {
   const ConfiguracoesAcervoCadastros({super.key});
@@ -197,204 +194,157 @@ class _ConfiguracoesAcervoCadastrosState
                                       },
                                       // -------------------------------------------------
 
-                                      child:
-                                          FutureBuilder<ExemplarDetalhesModel>(
-                                        future: ExemplarDetalhesService()
-                                            .fetchExemplarDetalhes(exemplar.id),
-                                        builder: (context, snapshot) {
-                                          if (snapshot.connectionState ==
-                                              ConnectionState.waiting) {
-                                            return const Center(
-                                              child:
-                                                  CircularProgressIndicator(),
-                                            );
-                                          } else if (snapshot.hasError) {
-                                            return Center(
-                                              child: Text(
-                                                'Erro ao carregar exemplar',
-                                                style: TextStyle(
-                                                  color:
-                                                      const Color(0xffcd4e4e),
-                                                  fontSize:
-                                                      responsiveFontSize(14.0),
-                                                  fontWeight: FontWeight.bold,
-                                                  fontFamily: 'Poppins',
-                                                ),
+                                      child: Opacity(
+                                        opacity: isLocked ? 0.5 : 1,
+                                        child: Container(
+                                          margin: EdgeInsets.all(
+                                              screenWidth * 0.05),
+                                          padding: EdgeInsets.all(
+                                              screenWidth * 0.02),
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xfff6f5f2),
+                                            borderRadius:
+                                                BorderRadius.circular(8.0),
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: Colors.grey
+                                                    .withOpacity(0.5),
+                                                spreadRadius: 5,
+                                                blurRadius: 7,
+                                                offset: const Offset(0, 3),
                                               ),
-                                            );
-                                          } else {
-                                            final exemplarDetalhes =
-                                                snapshot.data!;
-                                            return Opacity(
-                                              opacity: isLocked ? 0.5 : 1,
-                                              child: Container(
-                                                margin: EdgeInsets.all(
-                                                    screenWidth * 0.05),
-                                                padding: EdgeInsets.all(
-                                                    screenWidth * 0.02),
-                                                decoration: BoxDecoration(
-                                                  color:
-                                                      const Color(0xfff6f5f2),
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          8.0),
-                                                  boxShadow: [
-                                                    BoxShadow(
-                                                      color: Colors.grey
-                                                          .withOpacity(0.5),
-                                                      spreadRadius: 5,
-                                                      blurRadius: 7,
-                                                      offset:
-                                                          const Offset(0, 3),
+                                            ],
+                                          ),
+                                          child: Row(
+                                            children: [
+                                              Stack(
+                                                children: [
+                                                  Image.asset(
+                                                    'assets/png/imagem_exemplar.png',
+                                                    width: screenWidth * 0.15,
+                                                    height: screenHeight * 0.1,
+                                                  ),
+                                                  if (isLocked)
+                                                    Icon(
+                                                      Icons.lock,
+                                                      size: screenWidth * 0.1,
+                                                      color: Colors.grey,
                                                     ),
-                                                  ],
-                                                ),
-                                                child: Row(
+                                                ],
+                                              ),
+                                              SizedBox(
+                                                  width: screenWidth * 0.002),
+                                              Expanded(
+                                                child: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
                                                   children: [
-                                                    Stack(
-                                                      children: [
-                                                        Image.network(
-                                                          dotenv.env[
-                                                                  'BASE_API_URL']! +
-                                                              dotenv.env[
-                                                                  'IMAGEM_EXEMPLAR']!,
-                                                          width: screenWidth *
-                                                              0.15,
-                                                          height: screenHeight *
-                                                              0.1,
-                                                        ),
-                                                        if (isLocked)
-                                                          Icon(
-                                                            Icons.lock,
-                                                            size: screenWidth *
-                                                                0.1,
-                                                            color: Colors.grey,
-                                                          ),
-                                                      ],
+                                                    Text(
+                                                      exemplar.titulo,
+                                                      style: TextStyle(
+                                                        fontFamily: 'Poppins',
+                                                        fontSize:
+                                                            responsiveFontSize(
+                                                                14.0),
+                                                        color: const Color(
+                                                            0xff14131a),
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                      ),
                                                     ),
                                                     SizedBox(
-                                                        width: screenWidth *
-                                                            0.002),
-                                                    Expanded(
-                                                      child: Column(
-                                                        crossAxisAlignment:
-                                                            CrossAxisAlignment
-                                                                .start,
+                                                        height: screenHeight *
+                                                            0.005),
+                                                    SingleChildScrollView(
+                                                      scrollDirection:
+                                                          Axis.horizontal,
+                                                      child: Row(
                                                         children: [
-                                                          Text(
-                                                            exemplarDetalhes
-                                                                .titulo,
-                                                            style: TextStyle(
-                                                              fontFamily:
-                                                                  'Poppins',
-                                                              fontSize:
-                                                                  responsiveFontSize(
-                                                                      14.0),
-                                                              color: const Color(
-                                                                  0xff14131a),
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold,
-                                                            ),
-                                                          ),
-                                                          SizedBox(
-                                                              height:
-                                                                  screenHeight *
-                                                                      0.005),
-                                                          SingleChildScrollView(
-                                                            scrollDirection:
-                                                                Axis.horizontal,
-                                                            child: Row(
-                                                              children: [
-                                                                for (var categoria
-                                                                    in exemplarDetalhes
-                                                                        .categorias)
-                                                                  _buildCategory(
-                                                                      categoria),
-                                                              ],
-                                                            ),
-                                                          ),
-                                                          SizedBox(
-                                                              height:
-                                                                  screenHeight *
-                                                                      0.01),
-                                                          SingleChildScrollView(
-                                                            scrollDirection:
-                                                                Axis.horizontal,
-                                                            child: Row(
-                                                              children: [
-                                                                for (var tipoTransacao
-                                                                    in exemplarDetalhes
-                                                                        .tiposTransacoes) ...[
-                                                                  Image.asset(
-                                                                    'assets/png/${removeDiacritics(tipoTransacao).toLowerCase()}.png',
-                                                                    width:
-                                                                        screenWidth *
-                                                                            0.1,
-                                                                    height:
-                                                                        screenHeight *
-                                                                            0.05,
-                                                                  ),
-                                                                  SizedBox(
-                                                                      width: screenWidth *
-                                                                          0.015),
-                                                                ]
-                                                              ],
-                                                            ),
-                                                          ),
+                                                          for (var categoria
+                                                              in exemplar
+                                                                  .categorias)
+                                                            _buildCategory(
+                                                                categoria),
                                                         ],
                                                       ),
                                                     ),
-                                                    Column(
-                                                      children: [
-                                                        IconButton(
-                                                          icon: const Icon(
-                                                            Icons.edit,
-                                                            color: Color(
-                                                                0xff4ecd72),
-                                                          ),
-                                                          onPressed: () {
-                                                            if (!isLocked) {
-                                                              Navigator
-                                                                  .pushReplacement(
-                                                                context,
-                                                                MaterialPageRoute(
-                                                                  builder: (context) =>
-                                                                      ConfiguracoesAcervoCadastrosAtualizar(
-                                                                          exemplarId:
-                                                                              exemplar.id),
-                                                                ),
-                                                              );
-                                                            }
-                                                          },
-                                                        ),
-                                                        IconButton(
-                                                          icon: const Icon(
-                                                            Icons.delete,
-                                                            color: Color(
-                                                                0xffcd4e4e),
-                                                          ),
-                                                          onPressed: () {
-                                                            Navigator
-                                                                .pushReplacement(
-                                                              context,
-                                                              MaterialPageRoute(
-                                                                builder: (context) =>
-                                                                    ConfiguracoesAcervoCadastrosExcluir(
-                                                                        exemplarId:
-                                                                            exemplar.id),
-                                                              ),
-                                                            );
-                                                          },
-                                                        ),
-                                                      ],
+                                                    SizedBox(
+                                                        height: screenHeight *
+                                                            0.01),
+                                                    SingleChildScrollView(
+                                                      scrollDirection:
+                                                          Axis.horizontal,
+                                                      child: Row(
+                                                        children: [
+                                                          for (var tipoTransacao
+                                                              in exemplar
+                                                                  .tiposTransacoes) ...[
+                                                            Image.asset(
+                                                              'assets/png/${removeDiacritics(tipoTransacao).toLowerCase()}.png',
+                                                              width:
+                                                                  screenWidth *
+                                                                      0.1,
+                                                              height:
+                                                                  screenHeight *
+                                                                      0.05,
+                                                            ),
+                                                            SizedBox(
+                                                                width:
+                                                                    screenWidth *
+                                                                        0.015),
+                                                          ]
+                                                        ],
+                                                      ),
                                                     ),
                                                   ],
                                                 ),
                                               ),
-                                            );
-                                          }
-                                        },
+                                              Column(
+                                                children: [
+                                                  IconButton(
+                                                    icon: const Icon(
+                                                      Icons.edit,
+                                                      color: Color(0xff4ecd72),
+                                                    ),
+                                                    onPressed: () {
+                                                      if (!isLocked) {
+                                                        Navigator
+                                                            .pushReplacement(
+                                                          context,
+                                                          MaterialPageRoute(
+                                                            builder: (context) =>
+                                                                ConfiguracoesAcervoCadastrosAtualizar(
+                                                                    exemplarId:
+                                                                        exemplar
+                                                                            .id),
+                                                          ),
+                                                        );
+                                                      }
+                                                    },
+                                                  ),
+                                                  IconButton(
+                                                    icon: const Icon(
+                                                      Icons.delete,
+                                                      color: Color(0xffcd4e4e),
+                                                    ),
+                                                    onPressed: () {
+                                                      Navigator.pushReplacement(
+                                                        context,
+                                                        MaterialPageRoute(
+                                                          builder: (context) =>
+                                                              ConfiguracoesAcervoCadastrosExcluir(
+                                                                  exemplarId:
+                                                                      exemplar
+                                                                          .id),
+                                                        ),
+                                                      );
+                                                    },
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
+                                          ),
+                                        ),
                                       ),
 
                                       // -------------------------------------------------
@@ -416,62 +366,66 @@ class _ConfiguracoesAcervoCadastrosState
 
                   // ===================================
 
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        SizedBox(height: screenHeight * 0.05),
-                        ElevatedButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      const ConfiguracoesAcervoCadastrosAnuncios()),
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xff4e90cd),
-                            foregroundColor: const Color(0xfff6f5f2),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8.0),
+                  Column(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            SizedBox(height: screenHeight * 0.05),
+                            ElevatedButton(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          const ConfiguracoesAcervoCadastrosAnuncios()),
+                                );
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xff4e90cd),
+                                foregroundColor: const Color(0xfff6f5f2),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8.0),
+                                ),
+                              ),
+                              child: Text(
+                                "Veja aqui seus anúncios",
+                                style: TextStyle(
+                                  fontSize: responsiveFontSize(16.0),
+                                  fontFamily: 'Poppins',
+                                ),
+                              ),
                             ),
-                          ),
-                          child: Text(
-                            "Veja aqui seus anúncios",
-                            style: TextStyle(
-                              fontSize: responsiveFontSize(16.0),
-                              fontFamily: 'Poppins',
+                            SizedBox(height: screenHeight * 0.1),
+                            ElevatedButton(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          const ConfiguracoesAcervoCadastrosSolicitacoes()),
+                                );
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xff4e90cd),
+                                foregroundColor: const Color(0xfff6f5f2),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8.0),
+                                ),
+                              ),
+                              child: Text(
+                                "Veja aqui suas solicitações",
+                                style: TextStyle(
+                                  fontSize: responsiveFontSize(16.0),
+                                  fontFamily: 'Poppins',
+                                ),
+                              ),
                             ),
-                          ),
+                          ],
                         ),
-                        SizedBox(height: screenHeight * 0.1),
-                        ElevatedButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      const ConfiguracoesAcervoCadastrosSolicitacoes()),
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xff4e90cd),
-                            foregroundColor: const Color(0xfff6f5f2),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8.0),
-                            ),
-                          ),
-                          child: Text(
-                            "Veja aqui suas solicitações",
-                            style: TextStyle(
-                              fontSize: responsiveFontSize(16.0),
-                              fontFamily: 'Poppins',
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                   // ===================================
                   // Fim do conteúdo da aba de negociações
@@ -515,14 +469,14 @@ class _ConfiguracoesAcervoCadastrosState
       margin: EdgeInsets.only(right: screenWidth * 0.015),
       padding: EdgeInsets.all(screenWidth * 0.014),
       decoration: BoxDecoration(
-        color: const Color(0xffbabdd3),
+        color: const Color(0xff4e90cd),
         borderRadius: BorderRadius.circular(20.0),
       ),
       child: Text(
         text,
         style: TextStyle(
-          fontSize: responsiveFontSize(11.0),
-          color: const Color(0xff14131a),
+          fontSize: responsiveFontSize(12.0),
+          color: const Color(0xfff6f5f2),
           fontFamily: 'Poppins',
         ),
       ),

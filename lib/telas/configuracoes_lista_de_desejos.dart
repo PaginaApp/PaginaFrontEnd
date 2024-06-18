@@ -1,13 +1,10 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:flutter/material.dart';
-import 'package:projeto_pagina/data/models/produto_model.dart';
 import 'package:projeto_pagina/data/repositories/desejo_repository.dart';
-import 'package:projeto_pagina/data/repositories/produto_repository.dart';
 import 'package:projeto_pagina/stores/desejo_store.dart';
 import 'package:projeto_pagina/telas/configuracoes_lista_de_desejos_1.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ConfiguracoesListaDeDesejos extends StatefulWidget {
   const ConfiguracoesListaDeDesejos({super.key});
@@ -146,9 +143,8 @@ class _ConfiguracoesListaDeDesejosState
                                   ),
                                   child: Row(
                                     children: [
-                                      Image.network(
-                                        dotenv.env['BASE_API_URL']! +
-                                            dotenv.env['IMAGEM_EXEMPLAR']!,
+                                      Image.asset(
+                                        'assets/png/imagem_exemplar.png',
                                         width: screenWidth * 0.15,
                                         height: screenHeight * 0.1,
                                       ),
@@ -172,44 +168,12 @@ class _ConfiguracoesListaDeDesejosState
                                                 height: screenHeight * 0.005),
                                             SingleChildScrollView(
                                               scrollDirection: Axis.horizontal,
-                                              child: FutureBuilder<
-                                                  List<ProdutoModel>>(
-                                                future: ProdutoRepository()
-                                                    .findByISBN(desejo.isbn),
-                                                builder: (context, snapshot) {
-                                                  if (snapshot
-                                                          .connectionState ==
-                                                      ConnectionState.waiting) {
-                                                    return const Center(
-                                                      child:
-                                                          CircularProgressIndicator(),
-                                                    );
-                                                  } else if (snapshot
-                                                      .hasError) {
-                                                    return Text(
-                                                      'Erro ao carregar categorias',
-                                                      style: TextStyle(
-                                                        color: const Color(
-                                                            0xffcd4e4e),
-                                                        fontSize:
-                                                            responsiveFontSize(
-                                                                12.0),
-                                                        fontFamily: 'Poppins',
-                                                      ),
-                                                    );
-                                                  } else {
-                                                    final livro =
-                                                        snapshot.data!;
-                                                    return Row(
-                                                      children: livro[0]
-                                                          .categorias
-                                                          .map((categoria) {
-                                                        return _buildCategory(
-                                                            categoria);
-                                                      }).toList(),
-                                                    );
-                                                  }
-                                                },
+                                              child: Row(
+                                                children: desejo.categorias
+                                                    .map((categoria) {
+                                                  return _buildCategory(
+                                                      categoria);
+                                                }).toList(),
                                               ),
                                             ),
                                             SizedBox(
@@ -346,15 +310,15 @@ class _ConfiguracoesListaDeDesejosState
       margin: EdgeInsets.only(right: screenWidth * 0.015),
       padding: EdgeInsets.all(screenWidth * 0.014),
       decoration: BoxDecoration(
-        color: const Color(0xffbabdd3),
+        color: const Color(0xff4e90cd),
         borderRadius: BorderRadius.circular(20.0),
       ),
       child: Text(
         text,
         style: TextStyle(
           fontFamily: 'Poppins',
-          fontSize: responsiveFontSize(11.0),
-          color: const Color(0xff14131a),
+          fontSize: responsiveFontSize(12.0),
+          color: const Color(0xfff6f5f2),
         ),
       ),
     );

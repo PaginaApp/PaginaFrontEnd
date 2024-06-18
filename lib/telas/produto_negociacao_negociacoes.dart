@@ -7,10 +7,12 @@ import 'package:projeto_pagina/services/exemplar_detalhes_service.dart';
 import 'package:projeto_pagina/telas/configuracoes_lista_de_desejos.dart';
 import 'package:projeto_pagina/telas/confirmar_cancelamento.dart';
 import 'package:projeto_pagina/telas/confirmar_conclusao.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ProdutoNegociacaoNegociacoes extends StatefulWidget {
   final String exemplarId;
   final String transacaoLeitorId;
+  final String transacaoAnuncianteId;
   final String tipoTransacao;
   final String transacaoId;
 
@@ -18,6 +20,7 @@ class ProdutoNegociacaoNegociacoes extends StatefulWidget {
     Key? key,
     required this.exemplarId,
     required this.transacaoLeitorId,
+    required this.transacaoAnuncianteId,
     required this.tipoTransacao,
     required this.transacaoId,
   }) : super(key: key);
@@ -44,8 +47,17 @@ class _ProdutoNegociacaoNegociacoesState
 
     _exemplarDetalhesFuture =
         _exemplarService.fetchExemplarDetalhes(widget.exemplarId);
-    _dadosPessoaisFuture =
-        DadosPessoaisService().fetchDadosPessoais(widget.transacaoLeitorId);
+
+    SharedPreferences.getInstance().then((prefs) {
+      final userId = prefs.getString('userId');
+      if (userId == widget.transacaoLeitorId) {
+        _dadosPessoaisFuture = DadosPessoaisService()
+            .fetchDadosPessoais(widget.transacaoAnuncianteId);
+      } else {
+        _dadosPessoaisFuture =
+            DadosPessoaisService().fetchDadosPessoais(widget.transacaoLeitorId);
+      }
+    });
   }
 
   @override
@@ -439,10 +451,10 @@ class _ProdutoNegociacaoNegociacoesState
                                   ),
                                 );
                               } else {
-                                final solicitante = snapshot.data!;
+                                final outroUsuario = snapshot.data!;
                                 return Container(
                                   padding: EdgeInsets.all(screenWidth * 0.02),
-                                  color: const Color(0xffbabdd3),
+                                  color: const Color(0xff4e90cd),
                                   // ignore: sized_box_for_whitespace
                                   child: Container(
                                     height: screenHeight * 0.2,
@@ -490,14 +502,14 @@ class _ProdutoNegociacaoNegociacoesState
                                                 CrossAxisAlignment.start,
                                             children: [
                                               Text(
-                                                solicitante.nome,
+                                                outroUsuario.nome,
                                                 style: TextStyle(
                                                   fontSize:
                                                       responsiveFontSize(14.0),
                                                   fontFamily: 'Poppins',
                                                   fontWeight: FontWeight.bold,
                                                   color:
-                                                      const Color(0xff14131a),
+                                                      const Color(0xfff6f5f2),
                                                 ),
                                               ),
                                               SizedBox(
@@ -516,14 +528,14 @@ class _ProdutoNegociacaoNegociacoesState
                                                           screenWidth * 0.01),
                                                   Flexible(
                                                     child: Text(
-                                                      solicitante.telefone,
+                                                      outroUsuario.telefone,
                                                       style: TextStyle(
                                                         fontSize:
                                                             responsiveFontSize(
                                                                 12.0),
                                                         fontFamily: 'Poppins',
                                                         color: const Color(
-                                                            0xff14131a),
+                                                            0xfff6f5f2),
                                                       ),
                                                     ),
                                                   ),
@@ -545,14 +557,14 @@ class _ProdutoNegociacaoNegociacoesState
                                                           screenWidth * 0.01),
                                                   Flexible(
                                                     child: Text(
-                                                      solicitante.email,
+                                                      outroUsuario.email,
                                                       style: TextStyle(
                                                         fontSize:
                                                             responsiveFontSize(
                                                                 12.0),
                                                         fontFamily: 'Poppins',
                                                         color: const Color(
-                                                            0xff14131a),
+                                                            0xfff6f5f2),
                                                       ),
                                                     ),
                                                   ),
@@ -824,15 +836,15 @@ class _ProdutoNegociacaoNegociacoesState
       margin: EdgeInsets.only(right: screenWidth * 0.015),
       padding: EdgeInsets.all(screenWidth * 0.014),
       decoration: BoxDecoration(
-        color: const Color(0xffbabdd3),
+        color: const Color(0xff4e90cd),
         borderRadius: BorderRadius.circular(20.0),
       ),
       child: Text(
         text,
         style: TextStyle(
           fontFamily: 'Poppins',
-          fontSize: responsiveFontSize(11.0),
-          color: const Color(0xff14131a),
+          fontSize: responsiveFontSize(12.0),
+          color: const Color(0xfff6f5f2),
         ),
       ),
     );

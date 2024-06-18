@@ -129,18 +129,6 @@ class _ConfiguracoesState extends State<Configuracoes> {
                                   fontWeight: FontWeight.bold),
                             ),
                           ),
-                          // ignore: sized_box_for_whitespace
-                          Container(
-                            width: screenWidth * 0.5,
-                            child: Text(
-                              "@ tituloo",
-                              style: TextStyle(
-                                fontFamily: 'Poppins',
-                                fontSize: responsiveFontSize(15),
-                                color: const Color(0xfff6f5f2),
-                              ),
-                            ),
-                          ),
                         ],
                       ),
                     );
