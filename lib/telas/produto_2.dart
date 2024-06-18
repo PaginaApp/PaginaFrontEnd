@@ -1,21 +1,39 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:diacritic/diacritic.dart';
 import 'package:flutter/material.dart';
+import 'package:projeto_pagina/data/models/dados_pessoais_model.dart';
 import 'package:projeto_pagina/data/models/exemplar_detalhes_model.dart';
+import 'package:projeto_pagina/services/dados_pessoais_service.dart';
 import 'package:projeto_pagina/services/exemplar_detalhes_service.dart';
+import 'package:projeto_pagina/services/transacao_service.dart';
 import 'package:projeto_pagina/telas/configuracoes_lista_de_desejos.dart';
+import 'package:projeto_pagina/telas/home.dart';
 
-class Produto1 extends StatefulWidget {
+class Produto2 extends StatefulWidget {
   final String exemplarId;
+  final String transacaoLeitorId;
+  final String tipoTransacao;
+  final String statusTransacao;
+  final String transacaoId;
 
-  const Produto1({Key? key, required this.exemplarId}) : super(key: key);
+  const Produto2({
+    Key? key,
+    required this.exemplarId,
+    required this.transacaoLeitorId,
+    required this.tipoTransacao,
+    required this.statusTransacao,
+    required this.transacaoId,
+  }) : super(key: key);
 
   @override
-  State<Produto1> createState() => _Produto1State();
+  State<Produto2> createState() => _Produto2State();
 }
 
-class _Produto1State extends State<Produto1> {
+class _Produto2State extends State<Produto2> {
   final ExemplarDetalhesService _exemplarService = ExemplarDetalhesService();
   late Future<ExemplarDetalhesModel> _exemplarDetalhesFuture;
+  late Future<DadosPessoaisModel> _dadosPessoaisFuture;
 
   final _controller = PageController();
 
@@ -28,6 +46,8 @@ class _Produto1State extends State<Produto1> {
 
     _exemplarDetalhesFuture =
         _exemplarService.fetchExemplarDetalhes(widget.exemplarId);
+    _dadosPessoaisFuture =
+        DadosPessoaisService().fetchDadosPessoais(widget.transacaoLeitorId);
   }
 
   @override
@@ -47,7 +67,7 @@ class _Produto1State extends State<Produto1> {
             AppBar(
               backgroundColor: const Color(0xfff6f5f2),
               title: Text(
-                'Livro',
+                'Livro anunciado',
                 style: TextStyle(
                   fontFamily: 'Poppins',
                   fontSize: responsiveFontSize(18),
@@ -123,7 +143,15 @@ class _Produto1State extends State<Produto1> {
                                             return const CircularProgressIndicator();
                                           } else if (snapshot.hasError) {
                                             return Text(
-                                                'Erro: ${snapshot.error}');
+                                              'Erro ao carregar imagem',
+                                              style: TextStyle(
+                                                fontFamily: 'Poppins',
+                                                fontSize:
+                                                    responsiveFontSize(16),
+                                                color: const Color(0xff14131a),
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            );
                                           } else {
                                             return snapshot.data!;
                                           }
@@ -352,64 +380,278 @@ class _Produto1State extends State<Produto1> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          if (exemplar.tiposTransacoes.isEmpty)
-                            Text(
-                              'Não há formas de negociação disponíveis',
-                              style: TextStyle(
-                                fontFamily: 'Poppins',
-                                fontSize: responsiveFontSize(12),
-                                color: const Color(0xff14131a),
-                              ),
-                            )
-                          else
-                            Column(
-                              children: [
-                                Row(
-                                  children: [
-                                    for (var tipo in exemplar.tiposTransacoes)
-                                      if (removeDiacritics(tipo) ==
-                                          'Emprestimo') ...[
-                                        _buildCircle(
-                                            'Empréstimo',
-                                            0,
-                                            exemplar.prazo == null
-                                                ? 'Indefinido'
-                                                : "${exemplar.prazo} dias"),
-                                        SizedBox(width: screenWidth * 0.07)
-                                      ] else if (tipo == 'Troca')
-                                        _buildCircle(
-                                          'Troca',
-                                          1,
-                                          '',
-                                        )
-                                  ],
-                                ),
-                                SizedBox(height: screenHeight * 0.02),
-                                Row(
-                                  children: [
-                                    for (var tipo in exemplar.tiposTransacoes)
-                                      if (tipo == 'Venda') ...[
-                                        _buildCircle(
-                                          'Venda',
-                                          2,
-                                          exemplar.preco == null
-                                              ? '0'
-                                              : exemplar.preco.toString(),
-                                        ),
-                                        SizedBox(width: screenWidth * 0.2),
-                                      ] else if (tipo == 'Doação')
-                                        _buildCircle(
-                                          'Doação',
-                                          3,
-                                          '',
-                                        )
-                                  ],
-                                ),
-                              ],
-                            )
+                          for (int i = 0; i < isSelected.length; i++)
+                            if (removeDiacritics(widget.tipoTransacao) ==
+                                    'Emprestimo' &&
+                                i == 0)
+                              _buildCircle(
+                                  'Empréstimo',
+                                  i,
+                                  exemplar.prazo == null
+                                      ? 'Indefinido'
+                                      : "${exemplar.prazo} dias")
+                            else if (widget.tipoTransacao == 'Troca' && i == 1)
+                              _buildCircle('Troca', i, '')
+                            else if (widget.tipoTransacao == 'Venda' && i == 2)
+                              _buildCircle(
+                                'Venda',
+                                i,
+                                exemplar.preco == null
+                                    ? '0'
+                                    : exemplar.preco.toString(),
+                              )
+                            else if (widget.tipoTransacao == 'Doação' && i == 3)
+                              _buildCircle('Doação', i, ''),
                         ],
                       ),
                       SizedBox(height: screenHeight * 0.05),
+                      Padding(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: screenWidth * 0.05),
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            'Negociação com:',
+                            style: TextStyle(
+                              fontFamily: 'Poppins',
+                              fontSize: responsiveFontSize(16),
+                              color: const Color(0xff14131a),
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: screenHeight * 0.02),
+                      Padding(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: screenWidth * 0.05),
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: FutureBuilder<DadosPessoaisModel>(
+                            future: _dadosPessoaisFuture,
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return const Center(
+                                    child: CircularProgressIndicator());
+                              } else if (snapshot.hasError) {
+                                return Center(
+                                  child: SizedBox(
+                                    height: screenHeight * 0.2,
+                                    width: screenWidth * 2,
+                                    child: Text(
+                                      'Erro ao carregar nome de usuário e título',
+                                      style: TextStyle(
+                                          fontFamily: 'Poppins',
+                                          fontSize: responsiveFontSize(14),
+                                          color: const Color(0xfff6f5f2),
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
+                                );
+                              } else {
+                                final solicitante = snapshot.data!;
+                                return Container(
+                                  padding: EdgeInsets.all(screenWidth * 0.02),
+                                  color: const Color(0xffbabdd3),
+                                  // ignore: sized_box_for_whitespace
+                                  child: Container(
+                                    height: screenHeight * 0.2,
+                                    width: screenWidth * 2,
+                                    child: Row(
+                                      children: [
+                                        FutureBuilder<Image>(
+                                          future: DadosPessoaisService()
+                                              .fetchAvatar(
+                                                  widget.transacaoLeitorId),
+                                          builder: (context, snapshot) {
+                                            if (snapshot.connectionState ==
+                                                ConnectionState.waiting) {
+                                              return const Center(
+                                                  child:
+                                                      CircularProgressIndicator());
+                                            } else if (snapshot.hasError) {
+                                              return Center(
+                                                child: Text(
+                                                  'Erro ao carregar imagem',
+                                                  style: TextStyle(
+                                                    color:
+                                                        const Color(0xfff6f5f2),
+                                                    fontFamily: 'Poppins',
+                                                    fontSize:
+                                                        responsiveFontSize(14),
+                                                  ),
+                                                ),
+                                              );
+                                            } else {
+                                              final image = snapshot.data!;
+                                              return CircleAvatar(
+                                                radius: screenWidth * 0.05,
+                                                backgroundColor:
+                                                    const Color(0xfff6f5f2),
+                                                child: image,
+                                              );
+                                            }
+                                          },
+                                        ),
+                                        SizedBox(width: screenWidth * 0.02),
+                                        Flexible(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                solicitante.nome,
+                                                style: TextStyle(
+                                                  fontSize:
+                                                      responsiveFontSize(14.0),
+                                                  fontFamily: 'Poppins',
+                                                  fontWeight: FontWeight.bold,
+                                                  color:
+                                                      const Color(0xff14131a),
+                                                ),
+                                              ),
+                                              SizedBox(
+                                                  height: screenHeight * 0.02),
+                                              Row(
+                                                children: [
+                                                  Icon(
+                                                    Icons.phone,
+                                                    color:
+                                                        const Color(0xfff6f5f2),
+                                                    size: responsiveFontSize(
+                                                        20.0),
+                                                  ),
+                                                  SizedBox(
+                                                      width:
+                                                          screenWidth * 0.01),
+                                                  Flexible(
+                                                    child: Text(
+                                                      solicitante.telefone,
+                                                      style: TextStyle(
+                                                        fontSize:
+                                                            responsiveFontSize(
+                                                                12.0),
+                                                        fontFamily: 'Poppins',
+                                                        color: const Color(
+                                                            0xff14131a),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                              SizedBox(
+                                                  height: screenHeight * 0.005),
+                                              Row(
+                                                children: [
+                                                  Icon(
+                                                    Icons.email,
+                                                    color:
+                                                        const Color(0xfff6f5f2),
+                                                    size: responsiveFontSize(
+                                                        20.0),
+                                                  ),
+                                                  SizedBox(
+                                                      width:
+                                                          screenWidth * 0.01),
+                                                  Flexible(
+                                                    child: Text(
+                                                      solicitante.email,
+                                                      style: TextStyle(
+                                                        fontSize:
+                                                            responsiveFontSize(
+                                                                12.0),
+                                                        fontFamily: 'Poppins',
+                                                        color: const Color(
+                                                            0xff14131a),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              }
+                            },
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: screenHeight * 0.02),
+                      ElevatedButton(
+                        onPressed: widget.statusTransacao == 'Cancelada' ||
+                                widget.statusTransacao == 'Concluída'
+                            ? null
+                            : () async {
+                                bool success = await _handleAceitarNegociacao();
+
+                                if (success && mounted) {
+                                  Navigator.pushAndRemoveUntil(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => const Home(),
+                                      ),
+                                      (route) => false);
+                                  ScaffoldMessenger.of(context)
+                                      .hideCurrentSnackBar();
+
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        'Negociação aceita com sucesso!',
+                                        style: TextStyle(
+                                          fontFamily: 'Poppins',
+                                          fontSize: responsiveFontSize(16.0),
+                                        ),
+                                      ),
+                                      duration: const Duration(seconds: 5),
+                                      backgroundColor: const Color(0xff4ecd72),
+                                    ),
+                                  );
+                                } else if (mounted) {
+                                  ScaffoldMessenger.of(context)
+                                      .hideCurrentSnackBar();
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        'Erro ao aceitar negociação!',
+                                        style: TextStyle(
+                                          fontFamily: 'Poppins',
+                                          fontSize: responsiveFontSize(16.0),
+                                        ),
+                                      ),
+                                      duration: const Duration(seconds: 5),
+                                      backgroundColor: const Color(0xffec4e4e),
+                                    ),
+                                  );
+                                }
+                              },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xff4e90cd),
+                          foregroundColor: const Color(0xfff6f5f2),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                        ),
+                        child: Text(
+                          widget.statusTransacao == 'Cancelada'
+                              ? 'Negociação cancelada'
+                              : widget.statusTransacao == 'Concluída'
+                                  ? 'Negociação concluída'
+                                  : widget.statusTransacao == 'Em espera'
+                                      ? 'Aceitar negociação'
+                                      : 'Negociação em andamento',
+                          style: TextStyle(
+                            fontSize: responsiveFontSize(16.0),
+                            fontFamily: 'Poppins',
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: screenHeight * 0.02),
                     ],
                   );
                 }
@@ -640,5 +882,14 @@ class _Produto1State extends State<Produto1> {
         ],
       ),
     );
+  }
+
+  Future<bool> _handleAceitarNegociacao() async {
+    try {
+      await TransacaoService().aceitarTransacao(widget.transacaoId);
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 }

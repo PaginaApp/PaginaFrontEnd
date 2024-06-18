@@ -1,7 +1,8 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:projeto_pagina/data/models/dados_pessoais_model.dart';
 import 'package:projeto_pagina/data/models/endereco_model.dart';
-import 'package:projeto_pagina/services/authentication_service.dart';
 import 'package:projeto_pagina/services/dados_pessoais_service.dart';
 import 'package:projeto_pagina/services/endereco_service.dart';
 import 'package:projeto_pagina/services/via_cep_service.dart';
@@ -611,7 +612,6 @@ class _ConfiguracoesMeusDadosState extends State<ConfiguracoesMeusDados> {
                                 maxLength: 100,
                                 validator: _validateRequiredField,
                                 decoration: InputDecoration(
-                                  // PERGUNTAR O QUE VAI RECEBER AQUI
                                   labelText: 'Cidade',
                                   hintText: 'Ex: Campinas',
                                   contentPadding: EdgeInsets.symmetric(
@@ -1445,7 +1445,6 @@ class _ConfiguracoesMeusDadosState extends State<ConfiguracoesMeusDados> {
       _stateController.text = response['uf'];
       return true;
     } catch (e) {
-      print(e.toString());
       return false;
     }
   }
@@ -1467,7 +1466,6 @@ class _ConfiguracoesMeusDadosState extends State<ConfiguracoesMeusDados> {
 
       return true;
     } catch (e) {
-      print(e.toString());
       return false;
     }
   }
@@ -1489,7 +1487,6 @@ class _ConfiguracoesMeusDadosState extends State<ConfiguracoesMeusDados> {
 
       return true;
     } catch (e) {
-      print(e.toString());
       return false;
     }
   }
@@ -1502,7 +1499,6 @@ class _ConfiguracoesMeusDadosState extends State<ConfiguracoesMeusDados> {
       );
       return true;
     } catch (e) {
-      print(e.toString());
       return false;
     }
   }

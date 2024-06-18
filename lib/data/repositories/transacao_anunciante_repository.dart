@@ -23,10 +23,20 @@ class TransacaoAnuncianteRepository implements ITransacaoAnuncianteRepository {
       if (responseData is Map<String, dynamic>) {
         final List<dynamic> transacoesData = responseData['results'];
 
-        final List<TransacaoAnuncianteModel> transacoes = transacoesData
-            .map((e) =>
-                TransacaoAnuncianteModel.fromJson(e as Map<String, dynamic>))
-            .toList();
+        final List<TransacaoAnuncianteModel> transacoes =
+            transacoesData.map((e) {
+          final Map<String, dynamic> transacaoData = e as Map<String, dynamic>;
+          final List<dynamic> exemplaresData = transacaoData['exemplares'];
+
+          if (exemplaresData.length > 1) {
+            exemplaresData.removeWhere((exemplar) => exemplar['exe_Id'] != id);
+          }
+
+          transacaoData['exemplares'] = exemplaresData[0];
+
+          return TransacaoAnuncianteModel.fromJson(transacaoData);
+        }).toList();
+
         return transacoes;
       } else {
         throw Exception('Formato de resposta inesperado');

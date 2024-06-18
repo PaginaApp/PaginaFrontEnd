@@ -2,7 +2,7 @@ class ExemplarDetalhesModel {
   final String id;
   final String descricao;
   final bool negociando;
-  final double? preco;
+  final String? preco;
   final int? prazo;
   final String usuID;
   final String titulo;
@@ -17,6 +17,7 @@ class ExemplarDetalhesModel {
   final String ecpId;
   final String estadoPaginas;
   final String epgId;
+  final List<String> tiposTransacoes;
 
   ExemplarDetalhesModel({
     required this.id,
@@ -37,6 +38,7 @@ class ExemplarDetalhesModel {
     required this.ecpId,
     required this.estadoPaginas,
     required this.epgId,
+    required this.tiposTransacoes,
   });
 
   factory ExemplarDetalhesModel.fromJson(Map<String, dynamic> json) {
@@ -44,8 +46,8 @@ class ExemplarDetalhesModel {
       id: json['exe_Id'],
       descricao: json['exe_Descricao'],
       negociando: json['exe_Negociando'],
-      preco: json['exe_Preco'] != null && json['exe_Preco'] is num
-          ? json['exe_Preco'].toDouble()
+      preco: json['exe_Preco'] != null && json['exe_Preco'] is String
+          ? json['exe_Preco']
           : null,
       prazo: json['exe_Prazo'] != null && json['exe_Prazo'] is num
           ? json['exe_Prazo'].toInt()
@@ -65,6 +67,9 @@ class ExemplarDetalhesModel {
       ecpId: json['estadoCapa']['ecp_Id'],
       estadoPaginas: json['estadoPaginas']['epg_Nome'],
       epgId: json['estadoPaginas']['epg_Id'],
+      tiposTransacoes: [
+        for (var item in json['tiposTransacoes']) item['ttr_Nome']
+      ],
     );
   }
 }

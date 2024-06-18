@@ -4,7 +4,6 @@ class DadosPessoaisModel {
   String cpf;
   String telefone;
   String email;
-  //String titulo;
 
   DadosPessoaisModel({
     required this.nome,
@@ -12,7 +11,6 @@ class DadosPessoaisModel {
     required this.cpf,
     required this.telefone,
     required this.email,
-    //required this.titulo,
   });
 
   factory DadosPessoaisModel.fromJson(Map<String, dynamic> json) {
@@ -22,7 +20,6 @@ class DadosPessoaisModel {
       cpf: json['usu_CPF'],
       telefone: json['usu_Telefone'],
       email: json['usu_Email'],
-      //titulo: json['usu_Titulo'],
     );
   }
 }

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:projeto_pagina/services/authentication_service.dart';
 import 'package:projeto_pagina/services/via_cep_service.dart';
 import 'package:projeto_pagina/telas/termos_de_uso.dart';
 
@@ -106,7 +105,7 @@ class _Cadastro1State extends State<Cadastro1> {
                       keyboardType: TextInputType.phone,
                       decoration: InputDecoration(
                         labelText: 'CEP',
-                        hintText: '00000-000',
+                        hintText: '00000000',
                         contentPadding: EdgeInsets.symmetric(
                             horizontal: screenHeight * 0.02),
                         border: OutlineInputBorder(
@@ -169,7 +168,6 @@ class _Cadastro1State extends State<Cadastro1> {
                       maxLength: 100,
                       validator: _validateRequiredField,
                       decoration: InputDecoration(
-                        // PERGUNTAR O QUE VAI RECEBER AQUI
                         labelText: 'Cidade',
                         hintText: 'Ex: Campinas',
                         contentPadding: EdgeInsets.symmetric(
@@ -440,23 +438,6 @@ class _Cadastro1State extends State<Cadastro1> {
                                 ),
                               );
                             }
-
-                            // temporario
-                            // Navigator.push(
-                            //   context,
-                            //   MaterialPageRoute(
-                            //       builder: (context) => const TermosDeUso()),
-                            // );
-                            // AuthenticationService().registerAdress(
-                            //   _cepController.text,
-                            //   _cityController.text,
-                            //   _neighborhoodController.text,
-                            //   _streetController.text,
-                            //   _numberController.text,
-                            //   _stateController.text,
-                            //   _complementController.text,
-                            //   "-",
-                            // );
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xff4e90cd),

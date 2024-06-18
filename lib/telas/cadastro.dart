@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:projeto_pagina/services/authentication_service.dart';
 import 'package:projeto_pagina/telas/cadastro_1.dart';
 import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 
@@ -19,6 +18,8 @@ class _CadastroState extends State<Cadastro> {
   final TextEditingController _phoneNumberController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -33,6 +34,30 @@ class _CadastroState extends State<Cadastro> {
     String? _validateRequiredField(String? value) {
       if (value == null || value.isEmpty) {
         return 'Campo obrigatório';
+      }
+      return null;
+    }
+
+    // ignore: no_leading_underscores_for_local_identifiers
+    String? _validatePassword(String? value) {
+      if (value!.isEmpty) {
+        return 'Campo obrigatório';
+      } else if (value.length < 6) {
+        return '6 caracteres no mínimo';
+      } else if (value != _confirmPasswordController.text) {
+        return 'As senhas não coincidem';
+      }
+      return null;
+    }
+
+    // ignore: no_leading_underscores_for_local_identifiers
+    String? _validateConfirmPassword(String? value) {
+      if (value!.isEmpty) {
+        return 'Campo obrigatório';
+      } else if (value.length < 6) {
+        return '6 caracteres no mínimo';
+      } else if (value != _passwordController.text) {
+        return 'As senhas não coincidem';
       }
       return null;
     }
@@ -128,13 +153,9 @@ class _CadastroState extends State<Cadastro> {
                         Expanded(
                           child: TextFormField(
                             controller: _birthDateController,
-                            // PERGUNTAR O QUE VAI RECEBER NA DATA DE NASC
                             maxLength: 10,
                             validator: _validateRequiredField,
                             keyboardType: TextInputType.datetime,
-                            // inputFormatters: [
-                            //   FilteringTextInputFormatter.digitsOnly
-                            // ],
                             decoration: InputDecoration(
                               labelText: 'Data de Nascimento',
                               hintText: '00/00/0000',
@@ -182,9 +203,8 @@ class _CadastroState extends State<Cadastro> {
                             validator: _validateRequiredField,
                             keyboardType: TextInputType.phone,
                             decoration: InputDecoration(
-                              // PERGUNTAR O QUE VAI RECEBER NO CPF
                               labelText: 'CPF',
-                              hintText: '000.000.000-00',
+                              hintText: 'Apenas números',
                               contentPadding: EdgeInsets.symmetric(
                                   horizontal: screenHeight * 0.02),
                               border: OutlineInputBorder(
@@ -226,9 +246,8 @@ class _CadastroState extends State<Cadastro> {
                       validator: _validateRequiredField,
                       keyboardType: TextInputType.phone,
                       decoration: InputDecoration(
-                        // PERGUNTAR O QUE VAI RECEBER AQUI
                         labelText: 'Telefone',
-                        hintText: '(00) 90000-0000',
+                        hintText: 'Número com DDD, sem espaços ou traços',
                         contentPadding: EdgeInsets.symmetric(
                             horizontal: screenHeight * 0.02),
                         border: OutlineInputBorder(
@@ -306,7 +325,7 @@ class _CadastroState extends State<Cadastro> {
                           child: TextFormField(
                             controller: _passwordController,
                             maxLength: 100,
-                            validator: _validateRequiredField,
+                            validator: _validatePassword,
                             obscureText: true,
                             decoration: InputDecoration(
                               labelText: 'Senha',
@@ -350,8 +369,9 @@ class _CadastroState extends State<Cadastro> {
                         ),
                         Expanded(
                           child: TextFormField(
+                            controller: _confirmPasswordController,
                             maxLength: 100,
-                            validator: _validateRequiredField,
+                            validator: _validateConfirmPassword,
                             obscureText: true,
                             decoration: InputDecoration(
                               labelText: 'Confirme a senha',
@@ -412,21 +432,6 @@ class _CadastroState extends State<Cadastro> {
                                         )),
                               );
                             }
-
-                            // temporario
-                            // Navigator.push(
-                            //   context,
-                            //   MaterialPageRoute(
-                            //       builder: (context) => const Cadastro1()),
-                            // );
-                            // AuthenticationService().registerUser(
-                            //   _nameController.text,
-                            //   _emailController.text,
-                            //   _passwordController.text,
-                            //   _phoneNumberController.text,
-                            //   _birthDateController.text,
-                            //   _cpfController.text,
-                            // );
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xff4e90cd),

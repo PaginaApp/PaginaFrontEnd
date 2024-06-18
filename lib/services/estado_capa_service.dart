@@ -23,7 +23,7 @@ class EstadoCapaService {
         throw Exception('Formato de resposta inesperado');
       }
     } else {
-      throw Exception('Falha ao carregar estado_capa');
+      throw Exception('Falha ao carregar estados da capa');
     }
   }
 }

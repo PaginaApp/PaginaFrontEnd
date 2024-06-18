@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:projeto_pagina/data/models/estado_capa_model.dart';
 import 'package:projeto_pagina/data/models/estado_paginas_model.dart';
@@ -157,8 +159,6 @@ class _ConfiguracoesAcervoCadastrosAddState
                               onSubmitted: (query) async {
                                 bool success =
                                     await _handlePesquisarProdutos(query);
-
-                                //bool success = true;
 
                                 if (success && mounted) {
                                   ScaffoldMessenger.of(context)
@@ -495,7 +495,6 @@ class _ConfiguracoesAcervoCadastrosAddState
                           final estadoCapa = snapshot.data!;
                           return Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            // exemplo de estado de conservação
                             children: [
                               _buildCoverState(
                                   estadoCapa[2].nome, 0, estadoCapa[2].id),
@@ -658,7 +657,6 @@ class _ConfiguracoesAcervoCadastrosAddState
                                       controller: daysController,
                                       enabled: isLoanSelected,
                                       keyboardType: TextInputType.number,
-                                      //validator: _validateRequiredField,
                                       decoration: InputDecoration(
                                         hintText: '00',
                                         contentPadding: EdgeInsets.symmetric(
@@ -812,15 +810,6 @@ class _ConfiguracoesAcervoCadastrosAddState
                             ),
                           ],
                         ),
-                        // ElevatedButton(
-                        //   onPressed: () {
-                        //     // if (_formKey.currentState?.validate() ?? false) {
-                        //     //   Navigator.push(
-                        //     //     context,
-                        //     //     MaterialPageRoute(
-                        //     //         builder: (context) => const Tela()),
-                        //     //   );
-                        //     // }
                       ],
                     ),
                   ],
@@ -1297,25 +1286,22 @@ class _ConfiguracoesAcervoCadastrosAddState
   }
 
   Future<bool> _handleCreateExemplar() async {
-    bool negociando = selectedNegotiationTypes.isNotEmpty;
-
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String userId = prefs.getString('userId') ?? '';
 
     priceController.text = priceController.text.replaceAll(',', '.');
-    double? preco = double.tryParse(priceController.text);
+    String? preco = priceController.text;
 
     int? prazo = int.tryParse(daysController.text);
     try {
       await ExemplarRepository().createExemplar(
         descriptionController.text,
-        negociando,
         livroId,
         userId,
         selectedPageStateId,
         selectedCoverStateId,
         selectedNegotiationTypes,
-        preco,
+        preco == '' ? null : preco,
         prazo,
       );
       return true;
