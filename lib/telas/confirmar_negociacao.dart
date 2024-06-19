@@ -232,7 +232,7 @@ class _ConfirmarNegociacaoState extends State<ConfirmarNegociacao> {
                       final anunciante = snapshot.data!;
                       return Container(
                         padding: EdgeInsets.all(screenWidth * 0.02),
-                        color: const Color(0xffbabdd3),
+                        color: const Color(0xff4e90cd),
                         // ignore: sized_box_for_whitespace
                         child: Container(
                           height: screenHeight * 0.2,
@@ -281,7 +281,7 @@ class _ConfirmarNegociacaoState extends State<ConfirmarNegociacao> {
                                         fontSize: responsiveFontSize(14.0),
                                         fontFamily: 'Poppins',
                                         fontWeight: FontWeight.bold,
-                                        color: const Color(0xff14131a),
+                                        color: const Color(0xfff6f5f2),
                                       ),
                                     ),
                                     SizedBox(height: screenHeight * 0.02),
@@ -300,7 +300,7 @@ class _ConfirmarNegociacaoState extends State<ConfirmarNegociacao> {
                                               fontSize:
                                                   responsiveFontSize(12.0),
                                               fontFamily: 'Poppins',
-                                              color: const Color(0xff14131a),
+                                              color: const Color(0xfff6f5f2),
                                             ),
                                           ),
                                         ),
@@ -322,7 +322,7 @@ class _ConfirmarNegociacaoState extends State<ConfirmarNegociacao> {
                                               fontSize:
                                                   responsiveFontSize(12.0),
                                               fontFamily: 'Poppins',
-                                              color: const Color(0xff14131a),
+                                              color: const Color(0xfff6f5f2),
                                             ),
                                           ),
                                         ),

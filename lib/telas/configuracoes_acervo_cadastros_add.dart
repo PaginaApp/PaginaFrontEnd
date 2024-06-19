@@ -164,28 +164,110 @@ class _ConfiguracoesAcervoCadastrosAddState
                                   ScaffoldMessenger.of(context)
                                       .hideCurrentSnackBar();
 
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                        'Livro encontrado com sucesso!',
-                                        style: TextStyle(
-                                          fontFamily: 'Poppins',
-                                          fontSize: responsiveFontSize(16.0),
-                                        ),
-                                      ),
-                                      duration: const Duration(seconds: 5),
-                                      backgroundColor: const Color(0xff4ecd72),
-                                    ),
-                                  );
-                                  final livro = produtoStore.state.value[0];
+                                  if (produtoStore.state.value.length > 1) {
+                                    showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return Dialog(
+                                          child: SizedBox(
+                                            width: MediaQuery.of(context)
+                                                    .size
+                                                    .width *
+                                                0.8,
+                                            child: SingleChildScrollView(
+                                              child: AlertDialog(
+                                                title: Text(
+                                                  "Selecione um livro",
+                                                  style: TextStyle(
+                                                    fontFamily: 'Poppins',
+                                                    color:
+                                                        const Color(0xff14131a),
+                                                    fontSize:
+                                                        responsiveFontSize(
+                                                            17.0),
+                                                  ),
+                                                ),
+                                                content: DropdownButton<String>(
+                                                  isExpanded: true,
+                                                  items: produtoStore
+                                                      .state.value
+                                                      .map<
+                                                          DropdownMenuItem<
+                                                              String>>((livro) {
+                                                    return DropdownMenuItem<
+                                                        String>(
+                                                      value: livro.id,
+                                                      child: Text(
+                                                        livro.titulo,
+                                                        style: TextStyle(
+                                                          fontFamily: 'Poppins',
+                                                          fontSize:
+                                                              responsiveFontSize(
+                                                                  14.0),
+                                                        ),
+                                                      ),
+                                                    );
+                                                  }).toList(),
+                                                  onChanged:
+                                                      (String? newValue) {
+                                                    final livroSelecionado =
+                                                        produtoStore.state.value
+                                                            .firstWhere(
+                                                                (livro) =>
+                                                                    livro.id ==
+                                                                    newValue);
 
-                                  livroId = livro.id;
-                                  isbnController.text = livro.isbn;
-                                  titleController.text = livro.titulo;
-                                  authorController.text = livro.autor;
-                                  publisherController.text = livro.editora;
-                                  yearController.text = livro.ano;
-                                  synopsisController.text = livro.sinopse;
+                                                    livroId =
+                                                        livroSelecionado.id;
+                                                    isbnController.text =
+                                                        livroSelecionado.isbn;
+                                                    titleController.text =
+                                                        livroSelecionado.titulo;
+                                                    authorController.text =
+                                                        livroSelecionado.autor;
+                                                    publisherController.text =
+                                                        livroSelecionado
+                                                            .editora;
+                                                    yearController.text =
+                                                        livroSelecionado.ano;
+                                                    synopsisController.text =
+                                                        livroSelecionado
+                                                            .sinopse;
+                                                    Navigator.of(context).pop();
+                                                  },
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    );
+                                  } else if (produtoStore.state.value.length ==
+                                      1) {
+                                    final livro = produtoStore.state.value[0];
+                                    livroId = livro.id;
+                                    isbnController.text = livro.isbn;
+                                    titleController.text = livro.titulo;
+                                    authorController.text = livro.autor;
+                                    publisherController.text = livro.editora;
+                                    yearController.text = livro.ano;
+                                    synopsisController.text = livro.sinopse;
+
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          'Livro encontrado com sucesso!',
+                                          style: TextStyle(
+                                            fontFamily: 'Poppins',
+                                            fontSize: responsiveFontSize(16.0),
+                                          ),
+                                        ),
+                                        duration: const Duration(seconds: 5),
+                                        backgroundColor:
+                                            const Color(0xff4ecd72),
+                                      ),
+                                    );
+                                  }
                                 } else if (mounted) {
                                   ScaffoldMessenger.of(context)
                                       .hideCurrentSnackBar();
